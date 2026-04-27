@@ -1,0 +1,27 @@
+package com.noyon.system.service;
+
+import com.noyon.system.entity.LibraryItem;
+import com.noyon.system.repository.LibraryItemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class LibraryItemService {
+
+    @Autowired
+    private LibraryItemRepository libraryItemRepository;
+
+    public LibraryItem createItem(LibraryItem item) {
+        return libraryItemRepository.save(item);
+    }
+
+    public List<LibraryItem> getItemsByUserId(Long userId) {
+        return libraryItemRepository.findByUserId(userId);
+    }
+
+    public String deleteItem(Long id) {
+        libraryItemRepository.deleteById(id);
+        return "Kitap silindi, ID: " + id;
+    }
+}
