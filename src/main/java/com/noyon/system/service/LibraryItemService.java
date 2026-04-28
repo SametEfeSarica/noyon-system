@@ -17,7 +17,8 @@ public class LibraryItemService {
     }
 
     public List<LibraryItem> getItemsByUserId(Long userId) {
-        return libraryItemRepository.findByUserId(userId);
+        // BURAYI DA GÜNCELLEDİK: Repository'deki yeni isme uyarladık
+        return libraryItemRepository.findByUser_Id(userId);
     }
 
     public String deleteItem(Long id) {
@@ -25,11 +26,9 @@ public class LibraryItemService {
         return "Kitap silindi, ID: " + id;
     }
 
-
     public List<LibraryItem> searchByTitle(String title) {
         return libraryItemRepository.findByTitleContainingIgnoreCase(title);
     }
-
 
     public List<LibraryItem> getByStatus(String status) {
         return libraryItemRepository.findByStatus(status);

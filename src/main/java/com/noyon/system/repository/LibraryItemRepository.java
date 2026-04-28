@@ -6,12 +6,10 @@ import java.util.List;
 
 public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> {
 
-
-    List<LibraryItem> findByUserId(Long userId);
-
+    // KRİTİK DOKUNUŞ: Alt çizgi (_) ile Spring Boot'a "User objesinin içindeki id'ye bak" diyoruz.
+    List<LibraryItem> findByUser_Id(Long userId);
 
     List<LibraryItem> findByTitleContainingIgnoreCase(String title);
-
 
     List<LibraryItem> findByStatus(String status);
 }

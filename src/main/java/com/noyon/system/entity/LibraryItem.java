@@ -1,5 +1,6 @@
 package com.noyon.system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
@@ -22,16 +23,11 @@ public class LibraryItem {
 
     private LocalDate dueDate; // Teslim tarihi
 
-    // --- İlişki Başlangıcı ---
-
+    // --- İŞTE SİHİRLİ DOKUNUŞ ---
     @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore // Bu kalkan sayesinde sonsuz döngü kırılır, React rahat bir nefes alır!
     private User user;
-
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    // --- İlişki Bitişi ---
 
     // Boş Constructor
     public LibraryItem() {
@@ -56,6 +52,4 @@ public class LibraryItem {
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
 }

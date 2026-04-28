@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/library")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/library_items")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "Kütüphane Yönetimi")
 public class LibraryItemController {
 
@@ -22,6 +22,21 @@ public class LibraryItemController {
     @Operation(summary = "Yeni kitap ekler")
     @PostMapping("/add")
     public ResponseEntity<LibraryItem> addLibraryItem(@RequestBody LibraryItem item) {
+        // DEDEKTİF DOKUNUŞU: React'tan gelen paket backend'e nasıl ulaşıyor?
+        System.out.println("--- YENİ KİTAP EKLENİYOR ---");
+        System.out.println("Kitap Adı: " + item.getTitle());
+        System.out.println("Yazar: " + item.getAuthor());
+
+        // Eğer User objesi Controller'a kadar gelebiliyorsa sorun Service'tedir.
+        // Eğer burada NULL düşüyorsa sorun Entity'nin (LibraryItem.java) yazılışındadır.
+        if (item.getUser() != null) {
+            System.out.println("Gelen User ID: " + item.getUser().getId());
+        } else {
+            System.err.println("🚨 KRİTİK UYARI: React'tan gelen User bilgisi kayboldu!");
+            System.err.println("Ensar'ın LibraryItem.java (Entity) sınıfındaki User ilişkisi yanlış yazılmış olabilir.");
+        }
+        System.out.println("----------------------------");
+
         return ResponseEntity.ok(libraryItemService.createItem(item));
     }
 
