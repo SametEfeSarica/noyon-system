@@ -24,4 +24,14 @@ public class LibraryItemService {
         libraryItemRepository.deleteById(id);
         return "Kitap silindi, ID: " + id;
     }
+
+
+    public List<LibraryItem> searchByTitle(String title) {
+        return libraryItemRepository.findByTitleContainingIgnoreCase(title);
+    }
+
+
+    public List<LibraryItem> getByStatus(String status) {
+        return libraryItemRepository.findByStatus(status);
+    }
 }
