@@ -1,5 +1,6 @@
 package com.noyon.system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -20,6 +21,8 @@ public class Note {
     // --- Tablo İlişkisi (User ile) ---
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnore //
+
     private User user;
 
     // Sadece bir tane userId değişkenimiz var, o da bu:
