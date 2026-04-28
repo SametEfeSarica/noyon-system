@@ -14,25 +14,28 @@ public class Note {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT") // Uzun yazılar için TEXT tipini seçiyoruz
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
-    private Long userId; // Bu notun hangi kullanıcıya (User ID) ait olduğunu tutacağız
+    // --- Tablo İlişkisi (User ile) ---
+    @ManyToOne
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+
+    // Sadece bir tane userId değişkenimiz var, o da bu:
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     private LocalDateTime createdAt;
 
-    // Her not oluşturulduğunda o anın tarihini otomatik atar
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Boş Constructor
-    public Note() {
-    }
+    public Note() {}
 
-    // Getters and Setters
+    // --- Getter ve Setter Metodları ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -41,6 +44,9 @@ public class Note {
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
