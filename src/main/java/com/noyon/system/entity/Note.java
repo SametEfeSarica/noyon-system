@@ -2,7 +2,6 @@ package com.noyon.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notes")
@@ -12,33 +11,25 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    // --- Tablo İlişkisi (User ile) ---
-    @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    @JsonIgnore //
+    private String folderName;
 
+    private String color;
+
+    // Soft delete kontrol sütunu (Varsayılan olarak silinmemiş)
+    private boolean isDeleted = false;
+
+    // --- İlişkiler ---
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
-    // Sadece bir tane userId değişkenimiz var, o da bu:
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public Note() {}
-
-    // --- Getter ve Setter Metodları ---
+    // --- Getter ve Setterlar ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -48,12 +39,15 @@ public class Note {
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
+    public String getFolderName() { return folderName; }
+    public void setFolderName(String folderName) { this.folderName = folderName; }
+
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+
+    public boolean isDeleted() { return isDeleted; }
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
