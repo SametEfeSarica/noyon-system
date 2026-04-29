@@ -10,4 +10,4 @@ public class NoyonApplication {
 		SpringApplication.run(NoyonApplication.class, args);
 	}
 
-}
+}	
