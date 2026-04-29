@@ -33,11 +33,8 @@ public class ProjectTask {
     // --- İlişkiler ---
     @ManyToOne
     @JoinColumn(name = "user_id")
-    // BURADAKİ @JsonIgnore SİLİNDİ!
+    // Dışarıdan veri alabilmesi için @JsonIgnore burada kapalı kalmalı
     private User user;
-
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
 
     // --- Getter ve Setter Metodları ---
     public Long getId() { return id; }
@@ -63,7 +60,4 @@ public class ProjectTask {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
 }
