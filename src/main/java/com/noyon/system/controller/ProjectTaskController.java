@@ -11,29 +11,40 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*") // Frontend'in tüm bağlantılarına izin verir
 public class ProjectTaskController {
 
     @Autowired
     private ProjectTaskService taskService;
 
+    // Görev Ekle
     @PostMapping("/add")
     public ResponseEntity<ProjectTask> addTask(@Valid @RequestBody ProjectTask task) {
-        return ResponseEntity.ok(taskService.createTask(task));
+        return ResponseEntity.ok(taskService.saveTask(task));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ProjectTask>> getUserTasks(@PathVariable Long userId) {
-        return ResponseEntity.ok(taskService.getTasksByUserId(userId));
+    // Kullanıcının Tüm Aktif Görevleri
+    @GetMapping("/active/{userId}")
+    public ResponseEntity<List<ProjectTask>> getActiveTasks(@PathVariable Long userId) {
+        return ResponseEntity.ok(taskService.getActiveTasks(userId));
     }
 
+    // Kanban İçin: Belirli Statüdeki Görevler (Örn: /api/tasks/kanban/1?status=TODO)
+    @GetMapping("/kanban/{userId}")
+    public ResponseEntity<List<ProjectTask>> getTasksForKanban(@PathVariable Long userId, @RequestParam String status) {
+        return ResponseEntity.ok(taskService.getTasksByStatus(userId, status));
+    }
+
+    // Sürükle Bırak (Statü Değiştir)
     @PutMapping("/update-status/{taskId}")
     public ResponseEntity<ProjectTask> updateStatus(@PathVariable Long taskId, @RequestParam String status) {
         return ResponseEntity.ok(taskService.updateTaskStatus(taskId, status));
     }
 
+    // Görevi Çöpe At (Soft Delete)
     @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<String> deleteTask(@PathVariable Long taskId) {
-        return ResponseEntity.ok(taskService.deleteTask(taskId));
+    public ResponseEntity<String> softDeleteTask(@PathVariable Long taskId) {
+        taskService.softDeleteTask(taskId);
+        return ResponseEntity.ok("Görev başarıyla çöp kutusuna taşındı.");
     }
 }
