@@ -12,26 +12,27 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/subscriptions")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Bu çok kritik! Emrah'ın bağlanmasını sağlar.
 @Tag(name = "Abonelik Yönetimi")
 public class SubscriptionController {
 
     @Autowired
     private SubscriptionService subscriptionService;
 
-    @Operation(summary = "Yeni abonelik ekler")
-    @PostMapping("/add")
-    public ResponseEntity<Subscription> addSubscription(@RequestBody Subscription subscription) {
-        return ResponseEntity.ok(subscriptionService.saveSubscription(subscription));
+    @Operation(summary = "Belirli bir kullanıcıya yeni abonelik ekler")
+    @PostMapping("/add/{userId}")
+    public ResponseEntity<Subscription> add(@RequestBody Subscription subscription, @PathVariable Long userId) {
+        // Service katmanına hem aboneliği hem de kullanıcı ID'sini gönderiyoruz.
+        return ResponseEntity.ok(subscriptionService.addSubscription(subscription, userId));
     }
 
     @Operation(summary = "Kullanıcı ID'sine göre tüm abonelikleri getirir")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Subscription>> getByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(subscriptionService.getSubscriptionsByUser(userId));
+    public ResponseEntity<List<Subscription>> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(subscriptionService.getSubscriptionsByUserId(userId));
     }
 
-    @Operation(summary = "Abonelik siler")
+    @Operation(summary = "ID bazlı abonelik siler")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
         subscriptionService.deleteSubscription(id);
