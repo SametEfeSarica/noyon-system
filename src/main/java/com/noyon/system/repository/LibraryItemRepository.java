@@ -9,16 +9,14 @@ import java.util.List;
 @Repository
 public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> {
 
-    // GÜNCELLEME: isDeleted alanı tabloda olmadığı için onu sildik.
-    // Sadece kullanıcıya ait kitapları sayar.
+    // DashboardService'deki hatayı çözen satır burasıdır.
+    // İsim karakteri karakterine aynı olmalıdır: countByUser_Id
     long countByUser_Id(Long userId);
 
-    // Kullanıcıya göre tüm öğeleri getirir
+    // Diğer gerekli metodlar
     List<LibraryItem> findByUser_Id(Long userId);
 
-    // Başlığa göre arama yapar
     List<LibraryItem> findByTitleContainingIgnoreCase(String title);
 
-    // Duruma göre filtreleme yapar
     List<LibraryItem> findByStatus(String status);
 }

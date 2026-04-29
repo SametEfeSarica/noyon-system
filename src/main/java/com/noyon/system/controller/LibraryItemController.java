@@ -4,12 +4,16 @@ import com.noyon.system.entity.LibraryItem;
 import com.noyon.system.service.LibraryItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/library_items")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -19,25 +23,23 @@ public class LibraryItemController {
     @Autowired
     private LibraryItemService libraryItemService;
 
-    @Operation(summary = "Yeni kitap ekler")
-    @PostMapping("/add")
-    public ResponseEntity<LibraryItem> addLibraryItem(@RequestBody LibraryItem item) {
-        // DEDEKTİF DOKUNUŞU: React'tan gelen paket backend'e nasıl ulaşıyor?
-        System.out.println("--- YENİ KİTAP EKLENİYOR ---");
-        System.out.println("Kitap Adı: " + item.getTitle());
-        System.out.println("Yazar: " + item.getAuthor());
+    @Operation(summary = "Yeni kitap ekler (Kullanıcı ID ile)")
+    @PostMapping("/add/{userId}") // Adresi /add/1 şeklinde kullanacağız
+    public ResponseEntity<?> addLibraryItem(@PathVariable Long userId, @RequestBody LibraryItem item) {
+        log.info("--- YENİ KİTAP EKLEME İSTEĞİ ---");
+        log.info("Kullanıcı ID: {}, Kitap: {}", userId, item.getTitle());
 
-        // Eğer User objesi Controller'a kadar gelebiliyorsa sorun Service'tedir.
-        // Eğer burada NULL düşüyorsa sorun Entity'nin (LibraryItem.java) yazılışındadır.
-        if (item.getUser() != null) {
-            System.out.println("Gelen User ID: " + item.getUser().getId());
-        } else {
-            System.err.println("🚨 KRİTİK UYARI: React'tan gelen User bilgisi kayboldu!");
-            System.err.println("Ensar'ın LibraryItem.java (Entity) sınıfındaki User ilişkisi yanlış yazılmış olabilir.");
+        try {
+            // Servis katmanına hem kitabı hem de URL'den gelen ID'yi gönderiyoruz
+            LibraryItem savedItem = libraryItemService.createItemManual(item, userId);
+            log.info("Kitap başarıyla kaydedildi. ID: {}", savedItem.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedItem);
+
+        } catch (Exception e) {
+            log.error("🚨 KİTAP EKLEME HATASI: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", "error", "message", e.getMessage()));
         }
-        System.out.println("----------------------------");
-
-        return ResponseEntity.ok(libraryItemService.createItem(item));
     }
 
     @Operation(summary = "Kullanıcıya ait kitapları listeler")
