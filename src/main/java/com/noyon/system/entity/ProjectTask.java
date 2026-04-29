@@ -32,8 +32,8 @@ public class ProjectTask {
 
     // --- İlişkiler ---
     @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    @JsonIgnore // Sonsuz döngüyü engeller!
+    @JoinColumn(name = "user_id")
+    // BURADAKİ @JsonIgnore SİLİNDİ!
     private User user;
 
     @Column(name = "user_id", nullable = false)
