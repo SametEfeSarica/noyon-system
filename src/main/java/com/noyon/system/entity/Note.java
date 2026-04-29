@@ -25,8 +25,8 @@ public class Note {
 
     // --- İlişkiler ---
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore
+    @JoinColumn(name = "user_id")
+    // BURADAKİ @JsonIgnore KALDIRILDI! (Artık dışarıdan id:1 bilgisi içeri girebilecek)
     private User user;
 
     // --- Getter ve Setterlar ---
