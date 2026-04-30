@@ -1,4 +1,5 @@
 package com.noyon.system.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -23,8 +24,7 @@ public class User {
     @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
     private String password;
 
-    // --- Tablo İlişkileri (One-to-Many) ---
-
+    // --- Tablo İlişkileri ---
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Note> notes;
@@ -32,6 +32,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<LibraryItem> libraryItems;
+
+    // YENİ: Takvim İlişkisi
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<CalendarEvent> calendarEvents;
 
     // --- Getter ve Setter Metodları ---
     public Long getId() { return id; }
@@ -46,4 +51,6 @@ public class User {
     public void setNotes(List<Note> notes) { this.notes = notes; }
     public List<LibraryItem> getLibraryItems() { return libraryItems; }
     public void setLibraryItems(List<LibraryItem> libraryItems) { this.libraryItems = libraryItems; }
+    public List<CalendarEvent> getCalendarEvents() { return calendarEvents; }
+    public void setCalendarEvents(List<CalendarEvent> calendarEvents) { this.calendarEvents = calendarEvents; }
 }
