@@ -7,10 +7,10 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    // Giriş işlemi için kullanıcı adı ile bulma
-    Optional<User> findByUsername(String username);
+    // Giriş için e-posta sorgusu
+    Optional<User> findByEmail(String email);
 
-    // Kayıt sırasında mükerrer kayıt kontrolü
+    // Kayıt kontrolleri
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 }

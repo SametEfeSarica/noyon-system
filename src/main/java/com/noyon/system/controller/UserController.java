@@ -5,13 +5,11 @@ import com.noyon.system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*") // Frontend erişimi için hayati
+@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
@@ -21,7 +19,7 @@ public class UserController {
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
             User savedUser = userService.registerUser(user);
-            return ResponseEntity.ok(convertToResponse(savedUser));
+            return ResponseEntity.ok(savedUser);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -30,22 +28,12 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         try {
-            String username = loginData.get("username");
+            String email = loginData.get("email");
             String password = loginData.get("password");
-            User user = userService.loginUser(username, password);
-            return ResponseEntity.ok(convertToResponse(user));
+            User user = userService.loginUser(email, password);
+            return ResponseEntity.ok(user);
         } catch (Exception e) {
-            // Giriş başarısızsa 401 Unauthorized dönüyoruz
             return ResponseEntity.status(401).body(e.getMessage());
         }
-    }
-
-    // Güvenlik: Şifreyi gizleyip sadece gerekli verileri dönen metod
-    private Map<String, Object> convertToResponse(User user) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("userId", user.getId());
-        response.put("username", user.getUsername());
-        response.put("email", user.getEmail());
-        return response;
     }
 }
