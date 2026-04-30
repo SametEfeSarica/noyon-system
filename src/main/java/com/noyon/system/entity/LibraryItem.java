@@ -1,6 +1,7 @@
 package com.noyon.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty; // Notasyon için gerekli import
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
@@ -19,20 +20,34 @@ public class LibraryItem {
     @NotBlank(message = "Yazar adı boş olamaz")
     private String author;
 
-    private String status; // ELIMDE, ALINACAK, KIRALIK
+    private String status;
+    private LocalDate dueDate;
 
-    private LocalDate dueDate; // Teslim tarihi
+    // --- YENİ EKLENEN ALANLAR ---
 
-    // Soft delete kontrol sütunu
+    @Column(columnDefinition = "LONGTEXT") // Base64 fotoğraflar için devasa alan
+    private String coverImage;
+
+    private int rating;
+
+    @JsonProperty("isFavorite") // JSON'daki ismi isFavorite olarak zorlar, eşleşme hatasını çözer
+    private boolean isFavorite = false;
+
+    private String genre;
+    private String folder;
+
+    // ----------------------------
+
     private boolean isDeleted = false;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore
+    @JsonIgnore // Sonsuz döngü kalkanı
     private User user;
 
     public LibraryItem() {}
 
+    // Getter ve Setterlar
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -47,6 +62,21 @@ public class LibraryItem {
 
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+
+    public String getCoverImage() { return coverImage; }
+    public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
+
+    public int getRating() { return rating; }
+    public void setRating(int rating) { this.rating = rating; }
+
+    public boolean isFavorite() { return isFavorite; }
+    public void setFavorite(boolean favorite) { isFavorite = favorite; }
+
+    public String getGenre() { return genre; }
+    public void setGenre(String genre) { this.genre = genre; }
+
+    public String getFolder() { return folder; }
+    public void setFolder(String folder) { this.folder = folder; }
 
     public boolean isDeleted() { return isDeleted; }
     public void setDeleted(boolean deleted) { isDeleted = deleted; }

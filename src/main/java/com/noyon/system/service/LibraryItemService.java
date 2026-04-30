@@ -32,26 +32,44 @@ public class LibraryItemService {
         return libraryItemRepository.save(item);
     }
 
-    // Sadece aktif (silinmemiş) kitapları getirir
+    // --- GÜNCELLEME (UPDATE) METODU ---
+    @Transactional
+    public LibraryItem updateItem(Long id, LibraryItem newItemData) {
+        LibraryItem existingItem = libraryItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Güncellenecek kitap bulunamadı!"));
+
+        // Eski alanlar
+        existingItem.setTitle(newItemData.getTitle());
+        existingItem.setAuthor(newItemData.getAuthor());
+        existingItem.setStatus(newItemData.getStatus());
+        existingItem.setDueDate(newItemData.getDueDate());
+
+        // PM'in istediği yeni alanlar
+        existingItem.setCoverImage(newItemData.getCoverImage());
+        existingItem.setRating(newItemData.getRating());
+        existingItem.setFavorite(newItemData.isFavorite());
+        existingItem.setGenre(newItemData.getGenre());
+        existingItem.setFolder(newItemData.getFolder());
+
+        return libraryItemRepository.save(existingItem);
+    }
+
     public List<LibraryItem> getItemsByUserId(Long userId) {
         return libraryItemRepository.findByUser_IdAndIsDeletedFalse(userId);
     }
 
-    // Çöp kutusundaki kitapları getirir
     public List<LibraryItem> getTrashedItemsByUserId(Long userId) {
         return libraryItemRepository.findByUser_IdAndIsDeletedTrue(userId);
     }
 
-    // Fiziksel silme yerine isDeleted = true yapıyoruz
     public String deleteItem(Long id) {
         LibraryItem item = libraryItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Kitap bulunamadı!"));
-        item.setDeleted(true);
+        item.setDeleted(true); // Soft delete kuralı
         libraryItemRepository.save(item);
         return "Kitap çöp kutusuna taşındı, ID: " + id;
     }
 
-    // Çöpten geri yükleme işlemi
     public String restoreItem(Long id) {
         LibraryItem item = libraryItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Kitap bulunamadı!"));

@@ -16,7 +16,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/library_items")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*") // CORS İzni kuralı
 @Tag(name = "Kütüphane Yönetimi")
 public class LibraryItemController {
 
@@ -24,25 +24,32 @@ public class LibraryItemController {
     private LibraryItemService libraryItemService;
 
     @Operation(summary = "Yeni kitap ekler (Kullanıcı ID ile)")
-    @PostMapping("/add/{userId}") // Adresi /add/1 şeklinde kullanacağız
+    @PostMapping("/add/{userId}")
     public ResponseEntity<?> addLibraryItem(@PathVariable Long userId, @RequestBody LibraryItem item) {
-        log.info("--- YENİ KİTAP EKLEME İSTEĞİ ---");
-        log.info("Kullanıcı ID: {}, Kitap: {}", userId, item.getTitle());
-
+        log.info("Kullanıcı ID: {}, Kitap: {} ekleme isteği.", userId, item.getTitle());
         try {
-            // Servis katmanına hem kitabı hem de URL'den gelen ID'yi gönderiyoruz
             LibraryItem savedItem = libraryItemService.createItemManual(item, userId);
-            log.info("Kitap başarıyla kaydedildi. ID: {}", savedItem.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(savedItem);
-
         } catch (Exception e) {
-            log.error("🚨 KİTAP EKLEME HATASI: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
 
-    @Operation(summary = "Kullanıcıya ait kitapları listeler")
+    // --- GÜNCELLEME (UPDATE) UCUNUN EKLENMESİ ---
+    @Operation(summary = "Mevcut kitabı günceller")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateLibraryItem(@PathVariable Long id, @RequestBody LibraryItem item) {
+        try {
+            LibraryItem updated = libraryItemService.updateItem(id, item);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", "error", "message", e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "Kullanıcıya ait aktif kitapları listeler")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<LibraryItem>> getLibraryItems(@PathVariable Long userId) {
         return ResponseEntity.ok(libraryItemService.getItemsByUserId(userId));
@@ -60,19 +67,19 @@ public class LibraryItemController {
         return ResponseEntity.ok(libraryItemService.getByStatus(status));
     }
 
-    @Operation(summary = "Kitap siler")
+    @Operation(summary = "Kitabı çöpe atar (Soft Delete)")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteLibraryItem(@PathVariable Long id) {
         return ResponseEntity.ok(libraryItemService.deleteItem(id));
     }
 
-    // Çöp kutusundaki kitapları listeler
+    @Operation(summary = "Çöp kutusundaki kitapları listeler")
     @GetMapping("/trash/{userId}")
     public List<LibraryItem> getTrashedItems(@PathVariable Long userId) {
         return libraryItemService.getTrashedItemsByUserId(userId);
     }
 
-    // Kitabı geri yükler
+    @Operation(summary = "Kitabı çöpten geri yükler")
     @PutMapping("/restore/{id}")
     public String restoreItem(@PathVariable Long id) {
         return libraryItemService.restoreItem(id);
