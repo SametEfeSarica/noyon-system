@@ -3,28 +3,31 @@ package com.noyon.system.service;
 import com.noyon.system.entity.Note;
 import com.noyon.system.repository.NoteRepository;
 import com.noyon.system.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor // @Autowired yerine daha güvenli olan constructor injection
 public class NoteService {
 
-    @Autowired
-    private NoteRepository noteRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final NoteRepository noteRepository;
+    private final UserRepository userRepository;
 
     // Aktif notları getir
     public List<Note> getActiveNotesByUserId(Long userId) {
-        return noteRepository.findByUser_IdAndIsDeletedFalse(userId);
+        return noteRepository.findByUserIdAndIsDeletedFalse(userId);
     }
 
     // Çöp kutusunu getir
     public List<Note> getTrashedNotesByUserId(Long userId) {
-        return noteRepository.findByUser_IdAndIsDeletedTrue(userId);
+        return noteRepository.findByUserIdAndIsDeletedTrue(userId);
+    }
+
+    // GÖREV: Arama (Arama yaparken sadece silinmemiş notlarda ara)
+    public List<Note> searchNotes(Long userId, String keyword) {
+        return noteRepository.findByUserIdAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(userId, keyword, keyword);
     }
 
     // Not oluşturma (UserId ile birlikte)
@@ -35,7 +38,7 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
-    // Not Güncelleme (Renk, Başlık, İçerik vb.)
+    // GÖREV GÜNCELLEMESİ: Tüm medya ve klasör alanlarını destekler
     public Note updateNote(Long noteId, Note noteDetails) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Not bulunamadı"));
@@ -43,7 +46,12 @@ public class NoteService {
         note.setTitle(noteDetails.getTitle());
         note.setContent(noteDetails.getContent());
         note.setColor(noteDetails.getColor());
-        note.setFolderName(noteDetails.getFolderName());
+
+        // Yeni Alanlar
+        note.setFolder(noteDetails.getFolder()); // String folderName yerine Folder entity
+        note.setImageUrl(noteDetails.getImageUrl());
+        note.setPdfUrl(noteDetails.getPdfUrl());
+        note.setHandwritingBase64(noteDetails.getHandwritingBase64());
 
         return noteRepository.save(note);
     }
