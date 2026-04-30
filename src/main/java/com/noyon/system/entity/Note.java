@@ -20,13 +20,13 @@ public class Note {
 
     private String color;
 
-    // Soft delete kontrol sütunu (Varsayılan olarak silinmemiş)
+    // Soft delete kontrol sütunu
     private boolean isDeleted = false;
 
     // --- İlişkiler ---
     @ManyToOne
     @JoinColumn(name = "user_id")
-    // BURADAKİ @JsonIgnore KALDIRILDI! (Artık dışarıdan id:1 bilgisi içeri girebilecek)
+    @JsonIgnore // PM'in talimatı: Sonsuz döngü kalkanı
     private User user;
 
     // --- Getter ve Setterlar ---
