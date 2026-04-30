@@ -5,8 +5,6 @@ import com.noyon.system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class UserService {
 
@@ -15,22 +13,19 @@ public class UserService {
 
     // Kullanıcı Kaydı
     public User registerUser(User user) {
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("Bu kullanıcı adı zaten alınmış!");
+        }
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Bu e-posta adresi zaten kullanımda!");
         }
-        // Şifre güvenliği için normalde burada BCrypt kullanılır
-        // Şimdilik temel yapıyı kuruyoruz
         return userRepository.save(user);
     }
 
-    // Giriş Kontrolü
-    public User loginUser(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
-            return userOpt.get();
-        } else {
-            throw new RuntimeException("E-posta veya şifre hatalı!");
-        }
+    // Kullanıcı Girişi (Username ve Password ile)
+    public User loginUser(String username, String password) {
+        return userRepository.findByUsername(username)
+                .filter(user -> user.getPassword().equals(password))
+                .orElseThrow(() -> new RuntimeException("Kullanıcı adı veya şifre hatalı!"));
     }
 }
