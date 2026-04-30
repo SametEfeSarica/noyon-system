@@ -10,41 +10,41 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/notes")
-@CrossOrigin(origins = "*") // Frontend'den gelecek CORS hatalarını engeller
+@CrossOrigin(origins = "*") // PM'in talimatı: CORS İzni
 public class NoteController {
 
     @Autowired
     private NoteService noteService;
 
-    // Kullanıcının sadece AKTİF notlarını getir
     @GetMapping("/active/{userId}")
     public ResponseEntity<List<Note>> getActiveNotes(@PathVariable Long userId) {
         return ResponseEntity.ok(noteService.getActiveNotesByUserId(userId));
     }
 
-    // Kullanıcının ÇÖP KUTUSUNDAKİ notlarını getir
     @GetMapping("/trash/{userId}")
     public ResponseEntity<List<Note>> getTrashedNotes(@PathVariable Long userId) {
         return ResponseEntity.ok(noteService.getTrashedNotesByUserId(userId));
     }
 
-    // Not ekle / Güncelle
-    @PostMapping("/save")
-    public ResponseEntity<Note> saveNote(@RequestBody Note note) {
-        return ResponseEntity.ok(noteService.saveNote(note));
+    @PostMapping("/add/{userId}")
+    public ResponseEntity<Note> addNote(@PathVariable Long userId, @RequestBody Note note) {
+        return ResponseEntity.ok(noteService.saveNote(note, userId));
     }
 
-    // Notu çöp kutusuna at (Soft Delete)
+    @PutMapping("/update/{noteId}")
+    public ResponseEntity<Note> updateNote(@PathVariable Long noteId, @RequestBody Note note) {
+        return ResponseEntity.ok(noteService.updateNote(noteId, note));
+    }
+
     @DeleteMapping("/delete/{noteId}")
     public ResponseEntity<String> softDeleteNote(@PathVariable Long noteId) {
         noteService.deleteNote(noteId);
-        return ResponseEntity.ok("Not başarıyla çöp kutusuna taşındı.");
+        return ResponseEntity.ok("Not çöp kutusuna taşındı.");
     }
 
-    // Notu çöp kutusundan kurtar
     @PutMapping("/restore/{noteId}")
     public ResponseEntity<String> restoreNote(@PathVariable Long noteId) {
         noteService.restoreNote(noteId);
-        return ResponseEntity.ok("Not başarıyla geri yüklendi.");
+        return ResponseEntity.ok("Not geri yüklendi.");
     }
 }
