@@ -65,4 +65,16 @@ public class LibraryItemController {
     public ResponseEntity<String> deleteLibraryItem(@PathVariable Long id) {
         return ResponseEntity.ok(libraryItemService.deleteItem(id));
     }
+
+    // Çöp kutusundaki kitapları listeler
+    @GetMapping("/trash/{userId}")
+    public List<LibraryItem> getTrashedItems(@PathVariable Long userId) {
+        return libraryItemService.getTrashedItemsByUserId(userId);
+    }
+
+    // Kitabı geri yükler
+    @PutMapping("/restore/{id}")
+    public String restoreItem(@PathVariable Long id) {
+        return libraryItemService.restoreItem(id);
+    }
 }

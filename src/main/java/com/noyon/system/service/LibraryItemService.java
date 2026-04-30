@@ -16,36 +16,48 @@ import java.util.List;
 public class LibraryItemService {
 
     private final LibraryItemRepository libraryItemRepository;
-    private final UserRepository userRepository; // Kullanıcıyı bulmak için bu satır şart
+    private final UserRepository userRepository;
 
     @Transactional
     public LibraryItem createItem(LibraryItem item) {
         return libraryItemRepository.save(item);
     }
 
-    // İŞTE ÇÖZÜM: Controller'ın aradığı metot tam olarak bu
     @Transactional
     public LibraryItem createItemManual(LibraryItem item, Long userId) {
         log.info("Kullanıcı ID: {} için manuel kitap eşleştirmesi yapılıyor...", userId);
-
-        // 1. Kullanıcıyı DB'den buluyoruz
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Hata: ID'si " + userId + " olan kullanıcı bulunamadı!"));
-
-        // 2. Kitaba kullanıcıyı bizzat biz bağlıyoruz
         item.setUser(user);
-
-        // 3. Kaydediyoruz
         return libraryItemRepository.save(item);
     }
 
+    // Sadece aktif (silinmemiş) kitapları getirir
     public List<LibraryItem> getItemsByUserId(Long userId) {
-        return libraryItemRepository.findByUser_Id(userId);
+        return libraryItemRepository.findByUser_IdAndIsDeletedFalse(userId);
     }
 
+    // Çöp kutusundaki kitapları getirir
+    public List<LibraryItem> getTrashedItemsByUserId(Long userId) {
+        return libraryItemRepository.findByUser_IdAndIsDeletedTrue(userId);
+    }
+
+    // Fiziksel silme yerine isDeleted = true yapıyoruz
     public String deleteItem(Long id) {
-        libraryItemRepository.deleteById(id);
-        return "Kitap silindi, ID: " + id;
+        LibraryItem item = libraryItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kitap bulunamadı!"));
+        item.setDeleted(true);
+        libraryItemRepository.save(item);
+        return "Kitap çöp kutusuna taşındı, ID: " + id;
+    }
+
+    // Çöpten geri yükleme işlemi
+    public String restoreItem(Long id) {
+        LibraryItem item = libraryItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kitap bulunamadı!"));
+        item.setDeleted(false);
+        libraryItemRepository.save(item);
+        return "Kitap geri yüklendi, ID: " + id;
     }
 
     public List<LibraryItem> searchByTitle(String title) {

@@ -1,50 +1,57 @@
 package com.noyon.system.controller;
 
+import com.noyon.system.entity.ChecklistItem;
 import com.noyon.system.entity.ProjectTask;
+import com.noyon.system.entity.TaskComment;
 import com.noyon.system.service.ProjectTaskService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
-@CrossOrigin(origins = "*", allowedHeaders = "*") // Frontend'in tüm bağlantılarına izin verir
+@CrossOrigin(origins = "*")
 public class ProjectTaskController {
 
     @Autowired
-    private ProjectTaskService taskService;
+    private ProjectTaskService projectTaskService;
 
-    // Görev Ekle
     @PostMapping("/add")
-    public ResponseEntity<ProjectTask> addTask(@Valid @RequestBody ProjectTask task) {
-        return ResponseEntity.ok(taskService.saveTask(task));
+    public ProjectTask addTask(@RequestBody ProjectTask task) {
+        return projectTaskService.addTask(task);
     }
 
-    // Kullanıcının Tüm Aktif Görevleri
-    @GetMapping("/active/{userId}")
-    public ResponseEntity<List<ProjectTask>> getActiveTasks(@PathVariable Long userId) {
-        return ResponseEntity.ok(taskService.getActiveTasks(userId));
+    // Swagger'daki /api/tasks/active/{userId} ucunu karşılıyor
+    @GetMapping({"/active/{userId}", "/kanban/{userId}"})
+    public List<ProjectTask> getActiveTasks(@PathVariable Long userId) {
+        return projectTaskService.getTasksByUserId(userId);
     }
 
-    // Kanban İçin: Belirli Statüdeki Görevler (Örn: /api/tasks/kanban/1?status=TODO)
-    @GetMapping("/kanban/{userId}")
-    public ResponseEntity<List<ProjectTask>> getTasksForKanban(@PathVariable Long userId, @RequestParam String status) {
-        return ResponseEntity.ok(taskService.getTasksByStatus(userId, status));
-    }
-
-    // Sürükle Bırak (Statü Değiştir)
     @PutMapping("/update-status/{taskId}")
-    public ResponseEntity<ProjectTask> updateStatus(@PathVariable Long taskId, @RequestParam String status) {
-        return ResponseEntity.ok(taskService.updateTaskStatus(taskId, status));
+    public ProjectTask updateStatus(@PathVariable Long taskId, @RequestParam String status) {
+        return projectTaskService.updateTaskStatus(taskId, status);
     }
 
-    // Görevi Çöpe At (Soft Delete)
     @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<String> softDeleteTask(@PathVariable Long taskId) {
-        taskService.softDeleteTask(taskId);
-        return ResponseEntity.ok("Görev başarıyla çöp kutusuna taşındı.");
+    public void deleteTask(@PathVariable Long taskId) {
+        projectTaskService.deleteTask(taskId);
+    }
+
+    // --- YENİ EKLENEN DETAY UÇLARI ---
+
+    @PostMapping("/{taskId}/checklist")
+    public ChecklistItem addChecklist(@PathVariable Long taskId, @RequestBody ChecklistItem item) {
+        return projectTaskService.addChecklistItem(taskId, item);
+    }
+
+    @PutMapping("/checklist/{itemId}/toggle")
+    public ChecklistItem toggleChecklist(@PathVariable Long itemId) {
+        return projectTaskService.toggleChecklist(itemId);
+    }
+
+    @PostMapping("/{taskId}/comments")
+    public TaskComment addComment(@PathVariable Long taskId, @RequestParam Long userId, @RequestParam String text) {
+        return projectTaskService.addComment(taskId, userId, text);
     }
 }

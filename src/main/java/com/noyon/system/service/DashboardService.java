@@ -24,10 +24,10 @@ public class DashboardService {
         long notesCount = noteRepository.countByUser_IdAndIsDeletedFalse(userId);
 
         // 3. Kitaplar: isDeleted alanı olmadığı için sadece kullanıcı ID ile sayıyoruz
-        long booksCount = libraryItemRepository.countByUser_Id(userId);
+        long booksCount = libraryItemRepository.countByUser_IdAndIsDeletedFalse(userId);
 
         // 4. Görevler: Loglarda is_deleted sütunu eklendiği için bu şekilde devam ediyoruz
-        long tasksCount = projectTaskRepository.countByUser_IdAndIsDeletedFalse(userId);
+        long tasksCount = projectTaskRepository.countByUserId(userId);
 
         // 5. Abonelik ücreti toplamı
         Double totalCost = subscriptionRepository.getTotalSubscriptionCostByUserId(userId);

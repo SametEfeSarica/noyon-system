@@ -9,12 +9,17 @@ import java.util.List;
 @Repository
 public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> {
 
-    // DashboardService'deki hatayı çözen satır burasıdır.
-    // İsim karakteri karakterine aynı olmalıdır: countByUser_Id
+    // Eskiden tüm kitapları sayan metod
     long countByUser_Id(Long userId);
 
-    // Diğer gerekli metodlar
+    // İŞTE HATAYI ÇÖZEN SATIR: Sadece çöpe atılmamış (aktif) kitapları sayan metod
+    long countByUser_IdAndIsDeletedFalse(Long userId);
+
     List<LibraryItem> findByUser_Id(Long userId);
+
+    // --- SOFT DELETE LİSTELEME ---
+    List<LibraryItem> findByUser_IdAndIsDeletedFalse(Long userId);
+    List<LibraryItem> findByUser_IdAndIsDeletedTrue(Long userId);
 
     List<LibraryItem> findByTitleContainingIgnoreCase(String title);
 

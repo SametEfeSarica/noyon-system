@@ -11,10 +11,13 @@ import java.util.List;
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
 
-    // Kullanıcının tüm aboneliklerini liste olarak getirir
     List<Subscription> findByUserId(Long userId);
 
-    // Dashboard için: Kullanıcının tüm aktif aboneliklerinin toplam ücretini hesaplar
-    @Query("SELECT SUM(s.amount) FROM Subscription s WHERE s.user.id = :userId")
+    // --- SOFT DELETE İÇİN YENİ EKLENENLER ---
+    List<Subscription> findByUserIdAndIsDeletedFalse(Long userId); // Sadece aktifler
+    List<Subscription> findByUserIdAndIsDeletedTrue(Long userId);  // Sadece çöpteki abonelikler
+
+    // Dashboard için: Kullanıcının sadece SİLİNMEMİŞ aboneliklerinin toplam ücretini hesaplar
+    @Query("SELECT SUM(s.amount) FROM Subscription s WHERE s.user.id = :userId AND s.isDeleted = false")
     Double getTotalSubscriptionCostByUserId(@Param("userId") Long userId);
 }

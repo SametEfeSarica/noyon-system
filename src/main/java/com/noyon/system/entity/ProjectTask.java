@@ -2,8 +2,8 @@ package com.noyon.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "project_tasks")
@@ -13,28 +13,40 @@ public class ProjectTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Görev başlığı boş bırakılamaz")
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // KANBAN STATÜSÜ (TODO, IN_PROGRESS, DONE)
-    private String status = "TODO";
-
-    // ÖNCELİK (LOW, MEDIUM, HIGH)
-    private String priority = "MEDIUM";
-
+    private String status; // 'TODO', 'IN_PROGRESS', 'DONE'
+    private String priority; // 'LOW', 'MEDIUM', 'HIGH'
     private LocalDate dueDate;
 
-    // ÇÖP KUTUSU (Soft Delete) - Varsayılan: Silinmedi
-    private boolean isDeleted = false;
+    // Klasör Mantığı (Varsayılan değer atandı)
+    private String folderName = "Noyon Projesi";
 
-    // --- İlişkiler ---
-    @ManyToOne
+    // Görevi Oluşturan Kullanıcı
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    // Dışarıdan veri alabilmesi için @JsonIgnore burada kapalı kalmalı
+    @JsonIgnore
     private User user;
+
+    // Göreve Atanan Kullanıcılar (Grupça Kullanım)
+    @ManyToMany
+    @JoinTable(
+            name = "task_assignees",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> assignees;
+
+    // Görevin Alt Görevleri (Checklist)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChecklistItem> checklist;
+
+    // Görevin Yorumları
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskComment> comments;
 
     // --- Getter ve Setter Metodları ---
     public Long getId() { return id; }
@@ -55,9 +67,18 @@ public class ProjectTask {
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
-    public boolean isDeleted() { return isDeleted; }
-    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+    public String getFolderName() { return folderName; }
+    public void setFolderName(String folderName) { this.folderName = folderName; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    public List<User> getAssignees() { return assignees; }
+    public void setAssignees(List<User> assignees) { this.assignees = assignees; }
+
+    public List<ChecklistItem> getChecklist() { return checklist; }
+    public void setChecklist(List<ChecklistItem> checklist) { this.checklist = checklist; }
+
+    public List<TaskComment> getComments() { return comments; }
+    public void setComments(List<TaskComment> comments) { this.comments = comments; }
 }

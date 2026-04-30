@@ -13,13 +13,16 @@ public class Subscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String platformName; // Örn: Netflix
-    private Double amount;       // Örn: 159.90
-    private Integer renewalDate; // Örn: 15 (Ayın kaçında yenileniyor?)
-    private String currency;     // Örn: TRY
+    private String platformName;
+    private Double amount;
+    private Integer renewalDate;
+    private String currency;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Birçok abonelik bir kullanıcıya bağlanabilir.
-    @JoinColumn(name = "user_id")      // Veritabanında otomatik user_id sütunu açar.
-    @JsonIgnore // Emrah veri çekerken sonsuz döngü olmasın diye burayı görmezden gelir.
+    // Soft delete kontrol sütunu
+    private boolean isDeleted = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 }

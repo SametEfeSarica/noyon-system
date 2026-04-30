@@ -15,28 +15,38 @@ public class SubscriptionService {
     private SubscriptionRepository subscriptionRepository;
 
     @Autowired
-    private UserRepository userRepository; // Talha'nın kullanıcı deposunu buraya bağladık.
+    private UserRepository userRepository;
 
-    // Yeni abonelik ekleme (Kullanıcı ID'si ile birlikte)
     public Subscription addSubscription(Subscription subscription, Long userId) {
-        // 1. Önce veritabanında bu ID'ye sahip bir kullanıcı var mı diye bakıyoruz.
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Hata: " + userId + " ID'li kullanıcı bulunamadı!"));
-
-        // 2. Kullanıcıyı bulduysak, aboneliğin içine yerleştiriyoruz.
         subscription.setUser(user);
-
-        // 3. Şimdi her şeyiyle hazır olan aboneliği kaydediyoruz.
         return subscriptionRepository.save(subscription);
     }
 
-    // Kullanıcıya göre abonelikleri listeleme
+    // Sadece aktif (silinmemiş) abonelikleri listele
     public List<Subscription> getSubscriptionsByUserId(Long userId) {
-        return subscriptionRepository.findByUserId(userId);
+        return subscriptionRepository.findByUserIdAndIsDeletedFalse(userId);
     }
 
-    // Abonelik silme
+    // Çöp kutusundaki abonelikleri getir
+    public List<Subscription> getTrashedSubscriptionsByUserId(Long userId) {
+        return subscriptionRepository.findByUserIdAndIsDeletedTrue(userId);
+    }
+
+    // FİZİKSEL SİLME YERİNE isDeleted = true YAPIYORUZ
     public void deleteSubscription(Long id) {
-        subscriptionRepository.deleteById(id);
+        Subscription sub = subscriptionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Abonelik bulunamadı!"));
+        sub.setDeleted(true);
+        subscriptionRepository.save(sub);
+    }
+
+    // Çöpten Geri Yükle
+    public void restoreSubscription(Long id) {
+        Subscription sub = subscriptionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Abonelik bulunamadı!"));
+        sub.setDeleted(false);
+        subscriptionRepository.save(sub);
     }
 }

@@ -38,4 +38,16 @@ public class SubscriptionController {
         subscriptionService.deleteSubscription(id);
         return ResponseEntity.ok("Abonelik başarıyla silindi.");
     }
+
+    // Çöp kutusundaki abonelikleri listeler
+    @GetMapping("/trash/{userId}")
+    public List<Subscription> getTrashedSubscriptions(@PathVariable Long userId) {
+        return subscriptionService.getTrashedSubscriptionsByUserId(userId);
+    }
+
+    // Aboneliği geri yükler
+    @PutMapping("/restore/{id}")
+    public void restoreSubscription(@PathVariable Long id) {
+        subscriptionService.restoreSubscription(id);
+    }
 }

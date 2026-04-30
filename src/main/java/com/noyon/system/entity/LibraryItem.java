@@ -23,17 +23,16 @@ public class LibraryItem {
 
     private LocalDate dueDate; // Teslim tarihi
 
-    // --- İŞTE SİHİRLİ DOKUNUŞ ---
+    // Soft delete kontrol sütunu
+    private boolean isDeleted = false;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore // Bu kalkan sayesinde sonsuz döngü kırılır, React rahat bir nefes alır!
+    @JsonIgnore
     private User user;
 
-    // Boş Constructor
-    public LibraryItem() {
-    }
+    public LibraryItem() {}
 
-    // Getter ve Setter Metodları
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -49,7 +48,9 @@ public class LibraryItem {
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
+    public boolean isDeleted() { return isDeleted; }
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-
 }
