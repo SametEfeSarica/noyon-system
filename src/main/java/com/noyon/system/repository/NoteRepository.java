@@ -3,18 +3,20 @@ package com.noyon.system.repository;
 import com.noyon.system.entity.Note;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Long> {
 
-    // Dashboard için aktif not sayısını getiren yeni metodun
-    long countByUser_IdAndIsDeletedFalse(Long userId);
+    // Service katmanındaki getActiveNotesByUserId için:
+    List<Note> findByUserIdAndIsDeletedFalse(Long userId);
 
-    // Aktif notları liste olarak getirir
-    List<Note> findByUser_IdAndIsDeletedFalse(Long userId);
+    // Service katmanındaki getTrashedNotesByUserId için:
+    List<Note> findByUserIdAndIsDeletedTrue(Long userId);
 
-    // Çöp kutusundaki notları liste olarak getirir
-    List<Note> findByUser_IdAndIsDeletedTrue(Long userId);
+    // DashboardService'deki sayım için:
+    long countByUserIdAndIsDeletedFalse(Long userId);
+
+    // GÖREV: Arama Metodu (Başlık veya İçerik)
+    List<Note> findByUserIdAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(Long userId, String title, String content);
 }

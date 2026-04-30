@@ -2,11 +2,12 @@ package com.noyon.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name = "notes")
 public class Note {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,38 +17,22 @@ public class Note {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String folderName;
+    // GÖREV: Medya ve El Yazısı Desteği
+    private String imageUrl;
+    private String pdfUrl;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String handwritingBase64;
 
     private String color;
-
-    // Soft delete kontrol sütunu
     private boolean isDeleted = false;
 
-    // --- İlişkiler ---
+    @ManyToOne
+    @JoinColumn(name = "folder_id")
+    private Folder folder;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore // PM'in talimatı: Sonsuz döngü kalkanı
+    @JsonIgnore
     private User user;
-
-    // --- Getter ve Setterlar ---
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
-    public String getFolderName() { return folderName; }
-    public void setFolderName(String folderName) { this.folderName = folderName; }
-
-    public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
-
-    public boolean isDeleted() { return isDeleted; }
-    public void setDeleted(boolean deleted) { isDeleted = deleted; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
 }

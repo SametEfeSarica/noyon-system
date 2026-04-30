@@ -6,17 +6,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/dashboard") // Ana adresimiz bu: localhost:8080/api/dashboard
+@RequestMapping("/api/dashboard") // Ana adres: localhost:8080/api/dashboard
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // KRİTİK: Emrah'ın tarayıcısı "Dur yolcu!" demesin diye izni verdik
+@CrossOrigin(origins = "*") // Emrah'ın frontend bağlantısı için CORS izni
 public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    // Emrah'ın çağıracağı adres tam olarak bu: GET /api/dashboard/summary/1
+    // Tam adres: GET /api/dashboard/summary/{userId}
     @GetMapping("/summary/{userId}")
     public DashboardSummaryDTO getSummary(@PathVariable Long userId) {
-        // Senin yazdığın o muazzam servisi burada çağırıyoruz
+        // DashboardService içindeki getDashboardSummary metodunu tetikler
         return dashboardService.getDashboardSummary(userId);
     }
 }

@@ -16,24 +16,20 @@ public class DashboardService {
     private final SubscriptionRepository subscriptionRepository;
 
     public DashboardSummaryDTO getDashboardSummary(Long userId) {
-        // 1. Kullanıcı varlık kontrolü
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı!"));
 
-        // 2. Notlar: Aktif olanları sayar (isDeleted=false)
-        long notesCount = noteRepository.countByUser_IdAndIsDeletedFalse(userId);
+        // Notlar: Yeni Repository metoduna göre güncellendi
+        long notesCount = noteRepository.countByUserIdAndIsDeletedFalse(userId);
 
-        // 3. Kitaplar: isDeleted alanı olmadığı için sadece kullanıcı ID ile sayıyoruz
+        // Kitaplar: Mevcut yapıyı korur
         long booksCount = libraryItemRepository.countByUser_IdAndIsDeletedFalse(userId);
 
-        // 4. Görevler: Loglarda is_deleted sütunu eklendiği için bu şekilde devam ediyoruz
         long tasksCount = projectTaskRepository.countByUserId(userId);
 
-        // 5. Abonelik ücreti toplamı
         Double totalCost = subscriptionRepository.getTotalSubscriptionCostByUserId(userId);
         if (totalCost == null) totalCost = 0.0;
 
-        // 6. Özet DTO verisi döndürülür
         return new DashboardSummaryDTO(
                 user.getUsername(),
                 notesCount,
