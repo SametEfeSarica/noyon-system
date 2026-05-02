@@ -5,43 +5,49 @@ import com.noyon.system.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notes")
-@CrossOrigin(origins = "*") // PM'in talimatı: CORS İzni
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class NoteController {
 
     private final NoteService noteService;
 
-    // Aktif notları getir
-    @GetMapping("/active/{userId}")
+    // DÜZELTME 1: "/active/{userId}" yerine frontend'in beklediği "/{userId}" yapıldı.
+    @GetMapping("/{userId}")
     public ResponseEntity<List<Note>> getActiveNotes(@PathVariable Long userId) {
         return ResponseEntity.ok(noteService.getActiveNotesByUserId(userId));
     }
 
-    // Çöp kutusunu getir
     @GetMapping("/trash/{userId}")
     public ResponseEntity<List<Note>> getTrashedNotes(@PathVariable Long userId) {
         return ResponseEntity.ok(noteService.getTrashedNotesByUserId(userId));
     }
 
-    // GÖREV: Gelişmiş Arama (Keyword ile başlık veya içerikte arar)
     @GetMapping("/search")
     public ResponseEntity<List<Note>> searchNotes(@RequestParam Long userId, @RequestParam String keyword) {
         return ResponseEntity.ok(noteService.searchNotes(userId, keyword));
     }
 
-    // GÖREV: Yeni not ekle (Resim, PDF ve Base64 desteği Note entity içinden gelir)
-    @PostMapping("/add/{userId}")
-    public ResponseEntity<Note> addNote(@PathVariable Long userId, @RequestBody Note note) {
+    // DÜZELTME 2: Frontend ID'yi URL'den değil JSON gövdesinden yolluyor. Parametreler Map'e çevrildi.
+    @PostMapping("/add")
+    public ResponseEntity<Note> addNote(@RequestBody Map<String, Object> payload) {
+        ObjectMapper mapper = new ObjectMapper();
+        Note note = mapper.convertValue(payload, Note.class);
+        Long userId = Long.valueOf(payload.get("userId").toString());
+
         return ResponseEntity.ok(noteService.saveNote(note, userId));
     }
 
     @PutMapping("/update/{noteId}")
-    public ResponseEntity<Note> updateNote(@PathVariable Long noteId, @RequestBody Note note) {
+    public ResponseEntity<Note> updateNote(@PathVariable Long noteId, @RequestBody Map<String, Object> payload) {
+        ObjectMapper mapper = new ObjectMapper();
+        Note note = mapper.convertValue(payload, Note.class);
         return ResponseEntity.ok(noteService.updateNote(noteId, note));
     }
 

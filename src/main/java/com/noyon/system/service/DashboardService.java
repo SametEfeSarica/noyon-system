@@ -30,12 +30,13 @@ public class DashboardService {
         Double totalCost = subscriptionRepository.getTotalSubscriptionCostByUserId(userId);
         if (totalCost == null) totalCost = 0.0;
 
-        return new DashboardSummaryDTO(
-                user.getUsername(),
-                notesCount,
-                booksCount,
-                tasksCount,
-                totalCost
-        );
+        return DashboardSummaryDTO.builder()
+                .username(user.getUsername())
+                .notesCount(notesCount)
+                .booksCount(booksCount)
+                .tasksCount(tasksCount)
+                .totalMonthlyCost(totalCost != null ? totalCost : 0.0)
+                .upcomingPayments(new java.util.ArrayList<>()) // Şimdilik boş bir liste gönderiyoruz
+                .build();
     }
 }

@@ -5,7 +5,10 @@ import com.noyon.system.repository.CalendarRepository;
 import com.noyon.system.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/calendar")
@@ -25,8 +28,13 @@ public class CalendarController {
         return ResponseEntity.ok(calendarRepository.findByUserId(userId));
     }
 
-    @PostMapping("/add/{userId}")
-    public ResponseEntity<?> addEvent(@PathVariable Long userId, @RequestBody CalendarEvent event) {
+    // DÜZELTME: Frontend ile uyum için "/add/{userId}" yerine "/add" yapıldı. ID gövdeden alınıyor.
+    @PostMapping("/add")
+    public ResponseEntity<?> addEvent(@RequestBody Map<String, Object> payload) {
+        Long userId = Long.valueOf(payload.get("userId").toString());
+        ObjectMapper mapper = new ObjectMapper();
+        CalendarEvent event = mapper.convertValue(payload, CalendarEvent.class);
+
         return userRepository.findById(userId).map(user -> {
             event.setUser(user);
             CalendarEvent savedEvent = calendarRepository.save(event);
