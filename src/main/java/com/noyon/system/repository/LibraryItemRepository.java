@@ -2,26 +2,22 @@ package com.noyon.system.repository;
 
 import com.noyon.system.entity.LibraryItem;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> {
 
-    // Eskiden tüm kitapları sayan metod
-    long countByUser_Id(Long userId);
+    /** Kullanıcıya ait silinmemiş tüm kitaplar */
+    List<LibraryItem> findByUserIdAndDeletedFalse(Long userId);
 
-    // İŞTE HATAYI ÇÖZEN SATIR: Sadece çöpe atılmamış (aktif) kitapları sayan metod
-    long countByUser_IdAndIsDeletedFalse(Long userId);
+    /** Kategoriye göre filtrele (kullanıcıya ait, silinmemiş) */
+    List<LibraryItem> findByUserIdAndCategoryAndDeletedFalse(Long userId, String category);
 
-    List<LibraryItem> findByUser_Id(Long userId);
+    /** Başlıkta arama (büyük/küçük harf duyarsız) */
+    List<LibraryItem> findByTitleContainingIgnoreCaseAndDeletedFalse(String title);
 
-    // --- SOFT DELETE LİSTELEME ---
-    List<LibraryItem> findByUser_IdAndIsDeletedFalse(Long userId);
-    List<LibraryItem> findByUser_IdAndIsDeletedTrue(Long userId);
+    /** Çöp kutusundakiler */
+    List<LibraryItem> findByUserIdAndDeletedTrue(Long userId);
 
-    List<LibraryItem> findByTitleContainingIgnoreCase(String title);
-
-    List<LibraryItem> findByStatus(String status);
+    long countByUser_IdAndDeletedFalse(Long userId);
 }

@@ -19,11 +19,11 @@ public class DashboardService {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı!"));
 
-        // Notlar: Yeni Repository metoduna göre güncellendi
-        long notesCount = noteRepository.countByUserIdAndIsDeletedFalse(userId);
+        // Repository'deki yeni isimlere uyarlandı
+        long notesCount = noteRepository.countByUserIdAndDeletedFalse(userId);
 
-        // Kitaplar: Mevcut yapıyı korur
-        long booksCount = libraryItemRepository.countByUser_IdAndIsDeletedFalse(userId);
+        // Repository'deki yeni isimlere uyarlandı
+        long booksCount = libraryItemRepository.countByUser_IdAndDeletedFalse(userId);
 
         long tasksCount = projectTaskRepository.countByUserId(userId);
 
@@ -35,8 +35,8 @@ public class DashboardService {
                 .notesCount(notesCount)
                 .booksCount(booksCount)
                 .tasksCount(tasksCount)
-                .totalMonthlyCost(totalCost != null ? totalCost : 0.0)
-                .upcomingPayments(new java.util.ArrayList<>()) // Şimdilik boş bir liste gönderiyoruz
+                .totalMonthlyCost(totalCost)
+                .upcomingPayments(new java.util.ArrayList<>()) // Şimdilik boş liste
                 .build();
     }
 }

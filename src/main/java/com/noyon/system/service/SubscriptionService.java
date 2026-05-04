@@ -4,19 +4,20 @@ import com.noyon.system.entity.Subscription;
 import com.noyon.system.entity.User;
 import com.noyon.system.repository.SubscriptionRepository;
 import com.noyon.system.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SubscriptionService {
 
-    @Autowired
-    private SubscriptionRepository subscriptionRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
+    @Transactional
     public Subscription addSubscription(Subscription subscription, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Hata: " + userId + " ID'li kullanıcı bulunamadı!"));
@@ -24,17 +25,17 @@ public class SubscriptionService {
         return subscriptionRepository.save(subscription);
     }
 
-    // Sadece aktif (silinmemiş) abonelikleri listele
     public List<Subscription> getSubscriptionsByUserId(Long userId) {
-        return subscriptionRepository.findByUserIdAndIsDeletedFalse(userId);
+        // Repository'deki yeni isme uyarlandı
+        return subscriptionRepository.findByUserIdAndDeletedFalse(userId);
     }
 
-    // Çöp kutusundaki abonelikleri getir
     public List<Subscription> getTrashedSubscriptionsByUserId(Long userId) {
-        return subscriptionRepository.findByUserIdAndIsDeletedTrue(userId);
+        // Repository'deki yeni isme uyarlandı
+        return subscriptionRepository.findByUserIdAndDeletedTrue(userId);
     }
 
-    // FİZİKSEL SİLME YERİNE isDeleted = true YAPIYORUZ
+    @Transactional
     public void deleteSubscription(Long id) {
         Subscription sub = subscriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Abonelik bulunamadı!"));
@@ -42,7 +43,7 @@ public class SubscriptionService {
         subscriptionRepository.save(sub);
     }
 
-    // Çöpten Geri Yükle
+    @Transactional
     public void restoreSubscription(Long id) {
         Subscription sub = subscriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Abonelik bulunamadı!"));

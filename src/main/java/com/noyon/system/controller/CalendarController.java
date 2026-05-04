@@ -1,44 +1,91 @@
 package com.noyon.system.controller;
 
 import com.noyon.system.entity.CalendarEvent;
+import com.noyon.system.entity.User;
+import com.noyon.system.exception.ResourceNotFoundException;
 import com.noyon.system.repository.CalendarRepository;
 import com.noyon.system.repository.UserRepository;
+import com.noyon.system.response.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/calendar")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class CalendarController {
 
     private final CalendarRepository calendarRepository;
     private final UserRepository userRepository;
 
-    public CalendarController(CalendarRepository calendarRepository, UserRepository userRepository) {
-        this.calendarRepository = calendarRepository;
-        this.userRepository = userRepository;
+    @Data
+    static class CalendarEventRequest {
+        @NotBlank(message = "Etkinlik başlığı boş olamaz.")
+        private String title;
+
+        @NotNull(message = "Tarih zorunludur.")
+        private LocalDateTime eventDate;
+
+        private String category;
+        private String color;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<CalendarEvent>> getUserEvents(@PathVariable Long userId) {
-        return ResponseEntity.ok(calendarRepository.findByUserId(userId));
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CalendarEvent>>> getUserEvents(
+            @AuthenticationPrincipal UserDetails principal) {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<CalendarEvent> events = calendarRepository.findByUserId(user.getId());
+        return ResponseEntity.ok(ApiResponse.ok("Etkinlikler getirildi.", events));
     }
 
-    // DÜZELTME: Frontend ile uyum için "/add/{userId}" yerine "/add" yapıldı. ID gövdeden alınıyor.
-    @PostMapping("/add")
-    public ResponseEntity<?> addEvent(@RequestBody Map<String, Object> payload) {
-        Long userId = Long.valueOf(payload.get("userId").toString());
-        ObjectMapper mapper = new ObjectMapper();
-        CalendarEvent event = mapper.convertValue(payload, CalendarEvent.class);
+    @PostMapping
+    public ResponseEntity<ApiResponse<CalendarEvent>> addEvent(
+            @AuthenticationPrincipal UserDetails principal,
+            @Valid @RequestBody CalendarEventRequest request) {
 
-        return userRepository.findById(userId).map(user -> {
-            event.setUser(user);
-            CalendarEvent savedEvent = calendarRepository.save(event);
-            return ResponseEntity.ok(savedEvent);
-        }).orElseGet(() -> ResponseEntity.badRequest().build());
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        CalendarEvent event = CalendarEvent.builder()
+                .title(request.getTitle())
+                .eventDate(request.getEventDate())
+                .category(request.getCategory())
+                .color(request.getColor())
+                .user(user)
+                .build();
+
+        CalendarEvent saved = calendarRepository.save(event);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Etkinlik oluşturuldu.", saved));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteEvent(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long id) {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        CalendarEvent event = calendarRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("CalendarEvent", id));
+
+        if (!event.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Bu etkinliğe erişim yetkiniz yok."));
+        }
+
+        calendarRepository.deleteById(id);
+        return ResponseEntity.ok(ApiResponse.ok("Etkinlik silindi."));
     }
 }

@@ -13,11 +13,11 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     List<Subscription> findByUserId(Long userId);
 
-    // --- SOFT DELETE İÇİN YENİ EKLENENLER ---
-    List<Subscription> findByUserIdAndIsDeletedFalse(Long userId); // Sadece aktifler
-    List<Subscription> findByUserIdAndIsDeletedTrue(Long userId);  // Sadece çöpteki abonelikler
+    // DÜZELTME: isDeleted -> deleted yapıldı
+    List<Subscription> findByUserIdAndDeletedFalse(Long userId);
+    List<Subscription> findByUserIdAndDeletedTrue(Long userId);
 
-    // Dashboard için: Kullanıcının sadece SİLİNMEMİŞ aboneliklerinin toplam ücretini hesaplar
-    @Query("SELECT SUM(s.amount) FROM Subscription s WHERE s.user.id = :userId AND s.isDeleted = false")
+    // DÜZELTME: Query içinde s.isDeleted yerine s.deleted kullanıldı
+    @Query("SELECT SUM(s.amount) FROM Subscription s WHERE s.user.id = :userId AND s.deleted = false")
     Double getTotalSubscriptionCostByUserId(@Param("userId") Long userId);
 }

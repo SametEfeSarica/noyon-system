@@ -1,86 +1,130 @@
 package com.noyon.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty; // Notasyon için gerekli import
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDate;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * LibraryItem entity — genişletilmiş versiyon.
+ *
+ * Frontend (Library.jsx) şu alanları bekliyor:
+ *   id, title, author, category, pages, progress,
+ *   colorStart, colorEnd (color[0]/color[1] yerine),
+ *   accent, spine, cover, year, description,
+ *   tags (List<String>), rating, isFavorite
+ *
+ * DB'de tags virgülle ayrılmış String olarak saklanır,
+ * DTO katmanında List<String>'e dönüştürülür.
+ */
 @Entity
 @Table(name = "library_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LibraryItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Kitap başlığı boş olamaz")
+    // ── Temel bilgiler ──────────────────────────────────────────────────────────
+
+    @Column(nullable = false, length = 255)
     private String title;
 
-    @NotBlank(message = "Yazar adı boş olamaz")
+    @Column(nullable = false, length = 255)
     private String author;
 
-    private String status;
-    private LocalDate dueDate;
+    /** design | engineering | productivity | philosophy | business */
+    @Column(length = 50)
+    private String category;
 
-    // --- YENİ EKLENEN ALANLAR ---
+    private Integer pages;
 
-    @Column(columnDefinition = "LONGTEXT") // Base64 fotoğraflar için devasa alan
-    private String coverImage;
+    /** 0–100 arası okuma ilerlemesi */
+    @Builder.Default
+    private int progress = 0;
 
-    private int rating;
+    private Integer year;
 
-    @JsonProperty("isFavorite") // JSON'daki ismi isFavorite olarak zorlar, eşleşme hatasını çözer
-    private boolean isFavorite = false;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    private String genre;
-    private String folder;
+    // ── Görsel / UI alanlar ─────────────────────────────────────────────────────
 
-    // ----------------------------
+    /** Kitap kapağının gradient başlangıç rengi, örn: "#1a1a2e" */
+    @Column(name = "color_start", length = 20)
+    private String colorStart;
 
-    private boolean isDeleted = false;
+    /** Kitap kapağının gradient bitiş rengi, örn: "#16213e" */
+    @Column(name = "color_end", length = 20)
+    private String colorEnd;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    @JsonIgnore // Sonsuz döngü kalkanı
+    /** Vurgu rengi (buton, progress bar, tag), örn: "#7c3aed" */
+    @Column(length = 20)
+    private String accent;
+
+    /** Kitap sırtı (spine) rengi, örn: "#6d28d9" */
+    @Column(length = 20)
+    private String spine;
+
+    /**
+     * Kapak üzerindeki kısa metin/sembol (örn: "DOET", "CC", "0→1").
+     * LONGTEXT'e gerek yok; base64 resim kullanılmıyor.
+     */
+    @Column(length = 20)
+    private String cover;
+
+    // ── Meta ────────────────────────────────────────────────────────────────────
+
+    /**
+     * Etiketler virgülle ayrılmış şekilde saklanır: "UX,Psychology"
+     * DTO dönüşümünde List<String>'e parse edilir.
+     */
+    @Column(name = "tags", columnDefinition = "TEXT")
+    private String tags;
+
+    /** 1–5 yıldız puanı */
+    @Builder.Default
+    private int rating = 0;
+
+    @Builder.Default
+    @Column(name = "is_favorite", nullable = false)
+    private boolean favorite = false;
+
+    @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private boolean deleted = false;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // ── İlişki ─────────────────────────────────────────────────────────────────
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
-    public LibraryItem() {}
+    // ── Yardımcı metot ──────────────────────────────────────────────────────────
 
-    // Getter ve Setterlar
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
-
-    public String getCoverImage() { return coverImage; }
-    public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
-
-    public int getRating() { return rating; }
-    public void setRating(int rating) { this.rating = rating; }
-
-    public boolean isFavorite() { return isFavorite; }
-    public void setFavorite(boolean favorite) { isFavorite = favorite; }
-
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
-
-    public String getFolder() { return folder; }
-    public void setFolder(String folder) { this.folder = folder; }
-
-    public boolean isDeleted() { return isDeleted; }
-    public void setDeleted(boolean deleted) { isDeleted = deleted; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    /** "UX,Psychology" → ["UX","Psychology"] */
+    @Transient
+    public List<String> getTagList() {
+        if (tags == null || tags.isBlank()) return new ArrayList<>();
+        List<String> list = new ArrayList<>();
+        for (String t : tags.split(",")) {
+            String trimmed = t.trim();
+            if (!trimmed.isEmpty()) list.add(trimmed);
+        }
+        return list;
+    }
 }

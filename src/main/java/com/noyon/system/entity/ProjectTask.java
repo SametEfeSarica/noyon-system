@@ -2,83 +2,113 @@ package com.noyon.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * GÜNCELLENDİ: entity/ProjectTask.java  (v2 — dinamik sütun desteği)
+ *
+ * DEĞİŞİKLİKLER:
+ *
+ * 1. status alanı KALDIRILDI.
+ *    Artık "TODO / IN_PROGRESS / DONE" string'i yok.
+ *    Kartın durumu hangi sütunda olduğuyla belirlenir (column ilişkisi).
+ *    Bu mimari değişiklik drag & drop'u çok basitleştirir:
+ *    kart taşımak = column FK'yı değiştirmek.
+ *
+ * 2. column (TaskColumn) ManyToOne ilişkisi EKLENDİ.
+ *    @JsonIgnore ile sonsuz döngü önlendi.
+ *
+ * 3. position alanı EKLENDİ.
+ *    Sütun içindeki kart sırası için (0-tabanlı).
+ *    Drag & drop sırası bu alan sayesinde kalıcıdır.
+ *
+ * 4. labels alanı EKLENDİ.
+ *    Frontend'deki LabelChip'leri destekler.
+ *    ElementCollection ile basit string listesi olarak saklanır.
+ *
+ * 5. priority değerleri frontend ile uyumlu hale getirildi:
+ *    "urgent" | "high" | "medium" | "low"  (eskisi: LOW/MED/HIGH)
+ */
 @Entity
 @Table(name = "project_tasks")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProjectTask {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 255)
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String status; // 'TODO', 'IN_PROGRESS', 'DONE'
-    private String priority; // 'LOW', 'MEDIUM', 'HIGH'
+    /**
+     * Öncelik: urgent | high | medium | low
+     * Service katmanında validate edilir.
+     */
+    @Column(length = 10)
+    @Builder.Default
+    private String priority = "medium";
+
     private LocalDate dueDate;
 
-    // Klasör Mantığı (Varsayılan değer atandı)
-    private String folderName = "Noyon Projesi";
+    /** Sütun içindeki sıra (0-tabanlı). Drag & drop ile güncellenir. */
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer position = 0;
 
-    // Görevi Oluşturan Kullanıcı
+    // ── İlişkiler ─────────────────────────────────────────────────────────────
+
+    /** Kartın sahibi sütun. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "column_id", nullable = false)
+    @JsonIgnore
+    private TaskColumn column;
+
+    /** Pano sahibi kullanıcı — hızlı sorgular için denormalize FK. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
 
-    // Göreve Atanan Kullanıcılar (Grupça Kullanım)
-    @ManyToMany
+    /**
+     * Atanan kullanıcılar.
+     * DTO katmanı sadece userId + username döndürür.
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "task_assignees",
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> assignees;
+    @Builder.Default
+    private List<User> assignees = new ArrayList<>();
 
-    // Görevin Alt Görevleri (Checklist)
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChecklistItem> checklist;
+    /**
+     * Etiketler — basit string listesi.
+     * Ayrı entity'ye gerek yok, string koleksiyonu yeterli.
+     */
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "task_labels", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "label", length = 60)
+    @Builder.Default
+    private List<String> labels = new ArrayList<>();
 
-    // Görevin Yorumları
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskComment> comments;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ChecklistItem> checklist = new ArrayList<>();
 
-    // --- Getter ve Setter Metodları ---
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-
-    public String getPriority() { return priority; }
-    public void setPriority(String priority) { this.priority = priority; }
-
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
-
-    public String getFolderName() { return folderName; }
-    public void setFolderName(String folderName) { this.folderName = folderName; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-
-    public List<User> getAssignees() { return assignees; }
-    public void setAssignees(List<User> assignees) { this.assignees = assignees; }
-
-    public List<ChecklistItem> getChecklist() { return checklist; }
-    public void setChecklist(List<ChecklistItem> checklist) { this.checklist = checklist; }
-
-    public List<TaskComment> getComments() { return comments; }
-    public void setComments(List<TaskComment> comments) { this.comments = comments; }
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<TaskComment> comments = new ArrayList<>();
 }

@@ -1,22 +1,27 @@
 package com.noyon.system.controller;
 
 import com.noyon.system.dto.DashboardSummaryDTO;
+import com.noyon.system.repository.UserRepository;
+import com.noyon.system.response.ApiResponse;
 import com.noyon.system.service.DashboardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/dashboard") // Ana adres: localhost:8080/api/dashboard
+@RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Emrah'ın frontend bağlantısı için CORS izni
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final UserRepository userRepository;
 
-    // Tam adres: GET /api/dashboard/summary/{userId}
-    @GetMapping("/summary/{userId}")
-    public DashboardSummaryDTO getSummary(@PathVariable Long userId) {
-        // DashboardService içindeki getDashboardSummary metodunu tetikler
-        return dashboardService.getDashboardSummary(userId);
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<DashboardSummaryDTO>> getSummary(@AuthenticationPrincipal UserDetails principal) {
+        Long userId = userRepository.findByEmail(principal.getUsername()).orElseThrow().getId();
+        DashboardSummaryDTO summary = dashboardService.getDashboardSummary(userId);
+        return ResponseEntity.ok(ApiResponse.ok("Dashboard özeti getirildi.", summary));
     }
 }
