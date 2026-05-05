@@ -9,26 +9,6 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * REPLACED: entity/User.java
- *
- * PROBLEMS FIXED:
- *
- * 1. ProjectTask relationship was missing
- *    User owned ProjectTask records but the reverse OneToMany was not declared.
- *    Without it, CascadeType.ALL cannot propagate deletions, leaving orphan tasks
- *    in the DB when a user is deleted.
- *
- * 2. CalendarEvent relationship was missing the cascade declaration
- *    Old code had the OneToMany but no cascade — deleting a user left orphan events.
- *
- * 3. Password field had no @Column(nullable=false)
- *    A null password would be silently accepted by JPA and cause a DB constraint
- *    error instead of a clean validation error.
- *
- * All collection fields use @Builder.Default so they are initialized even when
- * the Builder is used without setting them, preventing NullPointerException.
- */
 @Entity
 @Table(name = "users")
 @Getter
@@ -51,12 +31,17 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    /** BCrypt hash — never returned in any DTO or response */
     @NotBlank
     @JsonIgnore
     @Column(nullable = false)
     private String password;
 
+    // Profil ve Ayarlar Alanları
+    private String displayName;
+    private String bio;
+    private String website;
+
+    // Mevcut İlişkiler
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
