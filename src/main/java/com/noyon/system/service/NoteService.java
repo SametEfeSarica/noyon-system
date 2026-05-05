@@ -18,66 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * REPLACED: service/NoteService.java
- *
- * PROBLEMS FIXED:
- *
- * 1. RuntimeException everywhere
- *    Old: throw new RuntimeException("Not bulunamadı")
- *    New: throw new ResourceNotFoundException("Note", noteId)
- *    This maps to HTTP 404 via GlobalExceptionHandler instead of HTTP 500.
- *
- * 2. No ownership verification
- *    Old: noteRepository.findById(noteId) — any user could update/delete any note.
- *    New: noteRepository.findByIdAndUserId(noteId, userId) — returns empty if the
- *    note doesn't belong to this user, then throws AccessDeniedException → HTTP 403.
- *
- * 3. Entity returned from service methods
- *    Old: public Note saveNote(...) — service returned entity, controller returned entity.
- *    New: public NoteResponse create(...) — service returns DTO, controller returns DTO.
- *    The entity never leaves the service layer.
- *
- * 4. @Transactional missing on write operations
- *    Old: noteRepository.save(note) was called without a transaction boundary.
- *    If Hibernate had to flush multiple times (e.g. save + relationship update),
- *    a failure midway left partial data.
- *    New: All write methods are @Transactional.
- *
- * 5. Folder field update was wrong
- *    Old: note.setFolder(noteDetails.getFolder()) — set the folder from the incoming
- *    Note entity, which meant the frontend had to send a full Folder object in the JSON.
- *    New: accepts a folderId Long. The service resolves the Folder entity itself.
- *
- * 6. No @Transactional(readOnly = true) on read methods
- *    Hibernate optimises read-only transactions by skipping dirty checking.
- *    Added on all getX() methods.
- */
 @Service
 @RequiredArgsConstructor
 public class NoteService {
 
-    private final NoteRepository  noteRepository;
-    private final UserRepository  userRepository;
+    private final NoteRepository noteRepository;
+    private final UserRepository userRepository;
     private final FolderRepository folderRepository;
-    private final NoteMapper      noteMapper;
-
-    // ── READ ─────────────────────────────────────────────────────────────────
+    private final NoteMapper noteMapper;
 
     @Transactional(readOnly = true)
     public List<NoteResponse> getActiveNotes(Long userId) {
         return noteRepository.findByUserIdAndDeletedFalse(userId)
-                .stream()
-                .map(noteMapper::toResponse)
-                .toList();
+                .stream().map(noteMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public List<NoteResponse> getTrashedNotes(Long userId) {
         return noteRepository.findByUserIdAndDeletedTrue(userId)
-                .stream()
-                .map(noteMapper::toResponse)
-                .toList();
+                .stream().map(noteMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -86,12 +45,8 @@ public class NoteService {
             return getActiveNotes(userId);
         }
         return noteRepository.searchByKeyword(userId, keyword.trim())
-                .stream()
-                .map(noteMapper::toResponse)
-                .toList();
+                .stream().map(noteMapper::toResponse).toList();
     }
-
-    // ── WRITE ────────────────────────────────────────────────────────────────
 
     @Transactional
     public NoteResponse create(Long userId, CreateNoteRequest request) {
@@ -136,7 +91,7 @@ public class NoteService {
                     .orElseThrow(() -> new ResourceNotFoundException("Folder", request.getFolderId()));
             note.setFolder(folder);
         } else {
-            note.setFolder(null);
+            note.setFolder(null); // Klasörden çıkarılmış olabilir
         }
 
         return noteMapper.toResponse(noteRepository.save(note));
@@ -152,8 +107,6 @@ public class NoteService {
 
     @Transactional
     public NoteResponse restore(Long userId, Long noteId) {
-        // Use findById here — a deleted note won't show in findByIdAndIsDeletedFalse,
-        // but we still own it. Ownership is verified by userId check below.
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Note", noteId));
 

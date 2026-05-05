@@ -57,6 +57,7 @@ public class Note {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Klasör silinirse notlar silinmesin, boşa çıksın diye FetchType.LAZY
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id")
     private Folder folder;
