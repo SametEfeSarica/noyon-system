@@ -1,34 +1,22 @@
 package com.noyon.system.dto.board;
 
-import lombok.Builder;
-import lombok.Data;
-
-import java.time.LocalDate;
+import lombok.*;
 import java.util.List;
 
-/**
- * DTO katmanı — Entity'ler JSON'a direkt serialize edilmez.
- *
- * Neden ayrı DTO?
- * - User entity'si (şifre hash'i, roller) sızmaz.
- * - @JsonIgnore ile döngü kırma hackleri gerekmez.
- * - Frontend'in beklediği shape tam olarak kontrol edilir.
- * - API versiyonlama kolaylaşır.
- */
 public class BoardDtos {
-
-    // ── Kart yanıt DTO'su ─────────────────────────────────────────────────────
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class CardResponse {
         private Long id;
         private String title;
         private String description;
-        private String priority;      // "urgent" | "high" | "medium" | "low"
-        private String dueDate;       // ISO yyyy-MM-dd string (frontend formatDate kullanıyor)
+        private String priority;
+        private String dueDate;
         private Integer position;
-        private Long columnId;        // Frontend drag & drop için gerekli
+        private Long columnId;
         private List<AssigneeDto> assignees;
         private List<String> labels;
         private List<ChecklistItemDto> checklist;
@@ -36,87 +24,99 @@ public class BoardDtos {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class AssigneeDto {
         private Long id;
         private String name;
-        private String initials;      // "EY" gibi — Avatar component kullanıyor
+        private String initials;
     }
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ChecklistItemDto {
         private Long id;
         private String text;
-        private boolean done;         // Frontend: item.done
+        private boolean done;
     }
-
-    // ── Sütun yanıt DTO'su ───────────────────────────────────────────────────
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ColumnResponse {
         private Long id;
         private String title;
-        private String color;         // Hex "#6c6af6"
+        private String color;
         private Integer position;
         private List<CardResponse> cards;
     }
 
-    // ── Pano yanıt DTO'su (tek endpoint'ten tümünü al) ───────────────────────
-
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class BoardResponse {
         private List<ColumnResponse> columns;
-        private List<AssigneeDto> members;  // Projedeki tüm kullanıcılar (Avatar listesi)
+        private List<AssigneeDto> members;
     }
 
-    // ── İstek DTO'ları ────────────────────────────────────────────────────────
-
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class CreateColumnRequest {
         private String title;
         private String color;
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class UpdateColumnRequest {
         private String title;
         private String color;
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class CreateCardRequest {
         private String title;
         private String description;
         private String priority;
-        private String dueDate;       // "yyyy-MM-dd" veya null
+        private String dueDate;
         private List<Long> assigneeIds;
         private List<String> labels;
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class UpdateCardRequest {
         private String title;
         private String description;
         private String priority;
         private String dueDate;
-        private Long columnId;        // Kart farklı sütuna taşınabilir (modal'dan)
+        private Long columnId;
         private List<Long> assigneeIds;
         private List<String> labels;
         private List<ChecklistItemDto> checklist;
     }
 
-    /** Drag & drop: kart columnId ve/veya position değişimi */
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class MoveCardRequest {
         private Long targetColumnId;
-        private Integer newPosition;  // Hedef sütundaki yeni index
+        private Integer newPosition;
     }
 
-    /** Sütun sırası değişimi */
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ReorderColumnsRequest {
-        private List<Long> columnIds; // Yeni sırayla tüm column id'leri
+        private List<Long> columnIds;
     }
 }
