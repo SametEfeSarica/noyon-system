@@ -4,6 +4,7 @@ import com.noyon.system.entity.ProjectTask;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +19,8 @@ public interface ProjectTaskRepository extends JpaRepository<ProjectTask, Long> 
     long countByUserId(Long userId);
 
     /** Belirli sütundaki en büyük position — yeni kart sonuna eklenirken */
-    @Query("SELECT COALESCE(MAX(t.position), -1) FROM ProjectTask t WHERE t.column.id = :columnId")
-    int findMaxPositionByColumnId(Long columnId);
+    @Query("SELECT MAX(t.position) FROM ProjectTask t WHERE t.column.id = :columnId")
+    Integer findMaxPositionByColumnId(@Param("columnId") Long columnId);
 
     /** Drag & drop sonrası position güncelleme (bulk) */
     @Modifying

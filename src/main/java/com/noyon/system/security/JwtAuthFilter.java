@@ -51,6 +51,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // Spring Security User sınıfı ile çakışmayı önlemek için tam yolu belirttik:
+            com.noyon.system.entity.User user = (com.noyon.system.entity.User) userDetails;
+            request.setAttribute("userId", user.getId());
         }
 
         filterChain.doFilter(request, response);

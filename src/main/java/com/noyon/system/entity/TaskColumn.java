@@ -15,8 +15,7 @@ import java.util.List;
  * Kartlar bu sütuna OneToMany ile bağlıdır.
  */
 @Entity
-@Table(name = "task_columns",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "position"}))
+@Table(name = "task_columns") // UniqueConstraint kaldırıldı!
 @Getter
 @Setter
 @NoArgsConstructor
