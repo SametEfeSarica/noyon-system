@@ -14,9 +14,10 @@ public class ProjectTaskController {
 
     private final ProjectTaskService projectTaskService;
 
-    @PostMapping("/add/{userId}/{columnId}")
+    // URL'den {userId} kısmını sildik, sadece {columnId} kaldı.
+    @PostMapping("/add/{columnId}")
     public ResponseEntity<ProjectTask> addTask(
-            @PathVariable Long userId,
+            @RequestAttribute("userId") Long userId, // Güvenli kaynağı (Filter'ı) kullanıyoruz
             @PathVariable Long columnId,
             @RequestBody ProjectTask task) {
 

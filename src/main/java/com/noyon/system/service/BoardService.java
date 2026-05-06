@@ -53,8 +53,10 @@ public class BoardService {
     @Transactional
     public ColumnResponse createColumn(CreateColumnRequest req, Long userId) {
         User user = findUser(userId);
+
+        // NullPointerException riskini tamamen ortadan kaldıran güvenli kontrol
         Integer maxPos = columnRepository.findMaxPositionByUserId(userId);
-        int nextPos = (maxPos == null) ? 0 : maxPos + 1;
+        int nextPos = (maxPos != null) ? maxPos + 1 : 0;
 
         TaskColumn column = TaskColumn.builder()
                 .title(req.getTitle())
@@ -100,9 +102,13 @@ public class BoardService {
         User user = findUser(userId);
         TaskColumn column = columnRepository.findByIdAndUserId(columnId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sütun bulunamadı", columnId));
+
         String title = (req.getTitle() == null || req.getTitle().isBlank()) ? "Yeni Görev" : req.getTitle();
+
+        // NullPointerException riskini tamamen ortadan kaldıran güvenli kontrol
         Integer maxPos = taskRepository.findMaxPositionByColumnId(columnId);
-        int nextPos = (maxPos == null) ? 0 : maxPos + 1;
+        int nextPos = (maxPos != null) ? maxPos + 1 : 0;
+
         ProjectTask task = ProjectTask.builder()
                 .title(title).description(req.getDescription())
                 .priority(req.getPriority() != null ? req.getPriority() : "medium")
