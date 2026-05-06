@@ -5,6 +5,7 @@ import com.noyon.system.service.ProjectTaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -14,10 +15,16 @@ public class ProjectTaskController {
 
     private final ProjectTaskService projectTaskService;
 
-    // URL'den {userId} kısmını sildik, sadece {columnId} kaldı.
-    @PostMapping("/add/{columnId}")
+    // DÜZELTME 1: React'in attığı GET isteğini karşılar ve 404/500 çökmesini durdurur.
+    // Eğer ileride tüm taskları getiren bir servise ihtiyacınız olursa içini doldurabilirsiniz.
+    @GetMapping
+    public ResponseEntity<?> getAllTasks() {
+        return ResponseEntity.ok(Collections.emptyList());
+    }
+
+    @PostMapping("/add/{userId}/{columnId}")
     public ResponseEntity<ProjectTask> addTask(
-            @RequestAttribute("userId") Long userId, // Güvenli kaynağı (Filter'ı) kullanıyoruz
+            @PathVariable Long userId,
             @PathVariable Long columnId,
             @RequestBody ProjectTask task) {
 

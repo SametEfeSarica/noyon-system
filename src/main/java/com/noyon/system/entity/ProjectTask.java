@@ -36,6 +36,11 @@ public class ProjectTask {
     @Builder.Default
     private Integer position = 0;
 
+    // DÜZELTME: Veritabanındaki is_deleted sütunu ile eşleşecek alan eklendi.
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "column_id", nullable = false)
     @JsonIgnore
@@ -46,7 +51,7 @@ public class ProjectTask {
     @JsonIgnore
     private User user;
 
-    @ManyToMany(fetch = FetchType.EAGER) // Değişti: Hata almamak için EAGER
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "task_assignees",
             joinColumns = @JoinColumn(name = "task_id"),
@@ -55,17 +60,32 @@ public class ProjectTask {
     @Builder.Default
     private List<User> assignees = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER) // Değişti: Hata almamak için EAGER
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "task_labels", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "label", length = 60)
     @Builder.Default
     private List<String> labels = new ArrayList<>();
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER) // Değişti: EAGER
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     private List<ChecklistItem> checklist = new ArrayList<>();
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<TaskComment> comments = new ArrayList<>();
+
+    // DÜZELTME: Veritabanına yazılmadan hemen önce Null kontrolü yapan HAYAT KURTARICI zırh
+    @PrePersist
+    public void prePersist() {
+        if (this.position == null) {
+            this.position = 0;
+        }
+        if (this.priority == null) {
+            this.priority = "medium";
+        }
+        // DÜZELTME: is_deleted hatasını engellemek için null kontrolü
+        if (this.isDeleted == null) {
+            this.isDeleted = false;
+        }
+    }
 }

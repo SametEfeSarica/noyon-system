@@ -87,6 +87,7 @@ public class BoardDtos {
         private String description;
         private String priority;
         private String dueDate;
+        private Integer position; // DÜZELTME: MySQL çökmesini önlemek için eklendi
         private List<Long> assigneeIds;
         private List<String> labels;
     }
@@ -99,6 +100,7 @@ public class BoardDtos {
         private String description;
         private String priority;
         private String dueDate;
+        private Integer position;
         private Long columnId;
         private List<Long> assigneeIds;
         private List<String> labels;
