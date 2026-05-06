@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Kanban Panosu")
 public class BoardController {
 
-    private final BoardService    boardService;
-    private final UserRepository  userRepository;
+    private final BoardService boardService;
+    private final UserRepository userRepository;
 
     private Long userId(UserDetails principal) {
         return userRepository.findByEmail(principal.getUsername())
-                .orElseThrow()
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"))
                 .getId();
     }
 
@@ -55,20 +55,27 @@ public class BoardController {
     }
 
     @PostMapping("/columns/{columnId}/cards")
-    public ResponseEntity<ApiResponse<CardResponse>> createCard(
+    public ResponseEntity<?> createCard(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable Long columnId,
-            @Valid @RequestBody CreateCardRequest request) { // @Valid eklendi
-        CardResponse card = boardService.createCard(columnId, request, userId(principal));
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Kart oluşturuldu.", card));
+            @Valid @RequestBody CreateCardRequest request) {
+        try {
+            // DÜZELTME 2: MySQL çökmesini (500 hatasını) engellemek için try-catch zırhı
+            CardResponse card = boardService.createCard(columnId, request, userId(principal));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.ok("Kart oluşturuldu.", card));
+        } catch (Exception e) {
+            // Hata olursa sistemi çökertme, React'e okunabilir bir mesaj yolla
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Kart eklenemedi! Muhtemelen zorunlu bir veri (Örn: order, title) eksik gönderiliyor. Detay: " + e.getMessage());
+        }
     }
 
     @PatchMapping("/cards/{id}")
     public ResponseEntity<ApiResponse<CardResponse>> updateCard(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable Long id,
-            @Valid @RequestBody UpdateCardRequest request) { // @Valid eklendi
+            @Valid @RequestBody UpdateCardRequest request) {
         CardResponse card = boardService.updateCard(id, request, userId(principal));
         return ResponseEntity.ok(ApiResponse.ok("Kart güncellendi.", card));
     }
