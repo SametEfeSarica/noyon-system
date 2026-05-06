@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*") // <-- EKLENEN KRİTİK SATIR: Frontend'in kapısını açar
 @RestController
 @RequestMapping("/api/notes")
 @RequiredArgsConstructor
