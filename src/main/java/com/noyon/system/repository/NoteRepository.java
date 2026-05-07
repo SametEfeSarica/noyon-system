@@ -15,7 +15,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
 
     // Kullanıcının çöp kutusundaki notlarını getirir
     List<Note> findByUserIdAndDeletedTrue(Long userId);
-
+    List<Note> findByUserIdAndDeletedFalse(Long userId, org.springframework.data.domain.Pageable pageable);
     // Güvenlik: Sadece o kullanıcıya ait olan bir notu bulur
     Optional<Note> findByIdAndUserId(Long id, Long userId);
 

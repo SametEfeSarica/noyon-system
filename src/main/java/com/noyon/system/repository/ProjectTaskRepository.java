@@ -12,7 +12,8 @@ import java.util.Optional;
 public interface ProjectTaskRepository extends JpaRepository<ProjectTask, Long> {
 
     List<ProjectTask> findByColumnIdOrderByPositionAsc(Long columnId);
-
+    // Kullanıcı ID'sine göre görevleri, sayfalama (Pageable) desteğiyle getir
+    List<ProjectTask> findByUserId(Long userId, org.springframework.data.domain.Pageable pageable);
     Optional<ProjectTask> findByIdAndUserId(Long id, Long userId);
 
     // EKSİK OLAN VE EKLENEN METOD BURASI: Dashboard'un toplam görev sayısını bulmasını sağlar
