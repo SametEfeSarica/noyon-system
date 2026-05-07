@@ -60,6 +60,7 @@ public class NoteService {
                 .imageUrl(request.getImageUrl())
                 .pdfUrl(request.getPdfUrl())
                 .handwritingBase64(request.getHandwritingBase64())
+                .tags(request.getTags()) // arkadaşınızın eklemesi
                 .user(user)
                 .build();
 
@@ -85,13 +86,14 @@ public class NoteService {
         note.setHandwritingBase64(request.getHandwritingBase64());
         note.setPinned(request.isPinned());
         note.setFavorite(request.isFavorite());
+        note.setTags(request.getTags()); // arkadaşınızın eklemesi
 
         if (request.getFolderId() != null) {
             Folder folder = folderRepository.findById(request.getFolderId())
                     .orElseThrow(() -> new ResourceNotFoundException("Folder", request.getFolderId()));
             note.setFolder(folder);
         } else {
-            note.setFolder(null); // Klasörden çıkarılmış olabilir
+            note.setFolder(null);
         }
 
         return noteMapper.toResponse(noteRepository.save(note));
@@ -118,12 +120,8 @@ public class NoteService {
         return noteMapper.toResponse(noteRepository.save(note));
     }
 
-    // Notu veritabanından tamamen uçurur
+    // Notu veritabanından tamamen siler
     public void permanentDelete(Long id) {
-        // Eğer notun var olup olmadığını kontrol etmek istersen buraya ekleyebilirsin
-        // noteRepository.findById(id).orElseThrow(() -> new RuntimeException("Not bulunamadı"));
-
         noteRepository.deleteById(id);
     }
-
 }

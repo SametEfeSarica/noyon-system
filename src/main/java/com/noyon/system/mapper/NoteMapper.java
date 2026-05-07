@@ -27,6 +27,7 @@ public class NoteMapper {
                 .folderName(note.getFolder() != null ? note.getFolder().getName() : null)
                 .createdAt(note.getCreatedAt())
                 .updatedAt(note.getUpdatedAt())
+                .tags(note.getTags()) // BÜYÜK DÜZELTME: Etiketleri Response'a ekledik
                 .build();
     }
 }

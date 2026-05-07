@@ -3,6 +3,7 @@ package com.noyon.system.dto.note;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class UpdateNoteRequest {
@@ -18,5 +19,5 @@ public class UpdateNoteRequest {
     private String handwritingBase64;
     private boolean pinned;
     private boolean favorite;
+    private List<String> tags;
 }
-

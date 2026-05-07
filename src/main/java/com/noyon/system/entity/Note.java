@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -36,6 +37,11 @@ public class Note {
 
     @Column(length = 20)
     private String color;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "note_tags", joinColumns = @JoinColumn(name = "note_id"))
+    @Column(name = "tag")
+    private List<String> tags;
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)

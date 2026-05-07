@@ -3,6 +3,7 @@ package com.noyon.system.dto.note;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class CreateNoteRequest {
@@ -16,4 +17,5 @@ public class CreateNoteRequest {
     private String imageUrl;
     private String pdfUrl;
     private String handwritingBase64;
+    private List<String> tags;
 }
