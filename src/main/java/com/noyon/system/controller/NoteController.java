@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*") // <-- EKLENEN KRİTİK SATIR: Frontend'in kapısını açar
 @RestController
 @RequestMapping("/api/notes")
 @RequiredArgsConstructor
@@ -93,11 +92,4 @@ public class NoteController {
         NoteResponse restored = noteService.restore(userId, id);
         return ResponseEntity.ok(ApiResponse.ok("Not geri yüklendi.", restored));
     }
-    // ── Çöp Kutusundan Kalıcı Olarak Silme ──
-    @DeleteMapping("/{id}/permanent")
-    public ResponseEntity<ApiResponse<String>> deletePermanent(@PathVariable Long id) {
-        noteService.permanentDelete(id);
-        return ResponseEntity.ok(ApiResponse.ok("Not veritabanından kalıcı olarak silindi.", "OK"));
-    }
-
 }

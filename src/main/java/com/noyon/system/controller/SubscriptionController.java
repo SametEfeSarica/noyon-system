@@ -37,7 +37,8 @@ public class SubscriptionController {
         @NotBlank(message = "Platform adı zorunludur.")
         private String platformName;
 
-        @DecimalMin(value = "0.0", message = "Tutar 0'dan büyük olmalıdır.")
+        // inclusive = false → 0.0 artık geçersiz, sadece 0'dan BÜYÜK değerler kabul edilir
+        @DecimalMin(value = "0.0", inclusive = false, message = "Tutar 0'dan büyük olmalıdır.")
         private Double amount;
 
         @Min(1) @Max(31)

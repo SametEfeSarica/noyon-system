@@ -5,6 +5,7 @@ import com.noyon.system.dto.auth.LoginRequest;
 import com.noyon.system.dto.auth.RegisterRequest;
 import com.noyon.system.entity.User;
 import com.noyon.system.exception.DuplicateResourceException;
+import com.noyon.system.exception.InvalidTokenException;
 import com.noyon.system.repository.UserRepository;
 import com.noyon.system.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,6 @@ public class AuthService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        // Şifreyi açık metin olarak değil, BCrypt ile şifreleyerek kaydediyoruz!
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User saved = userRepository.save(user);
@@ -56,7 +56,6 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        // Spring Security şifre kontrolünü BCrypt kullanarak otomatik yapar
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail().trim().toLowerCase(),
@@ -80,11 +79,15 @@ public class AuthService {
     }
 
     public AuthResponse refreshToken(String refreshToken) {
+        // RuntimeException yerine InvalidTokenException fırlatılıyor
+        // GlobalExceptionHandler bu exception'ı yakalayarak 401 döner
         if (!jwtService.isTokenValid(refreshToken)) {
-            throw new RuntimeException("Refresh token geçersiz veya süresi dolmuş.");
+            throw new InvalidTokenException("Refresh token geçersiz veya süresi dolmuş.");
         }
+
         String email = jwtService.extractUsername(refreshToken);
         User user = userRepository.findByEmail(email).orElseThrow();
+
         String newAccessToken = jwtService.generateAccessToken(email);
         String newRefreshToken = jwtService.generateRefreshToken(email);
 

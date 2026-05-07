@@ -90,8 +90,10 @@ public class GlobalExceptionHandler {
     // ── 500 Catch-all ────────────────────────────────────────────────────────
     // Never exposes internal error details to the client.
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> handleException(Exception e) {
-        e.printStackTrace(); // EKLENEN HAYAT KURTARICI SATIR!
-        return ResponseEntity.status(500).body(ApiResponse.error("Beklenmeyen bir hata oluştu."));
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        e.printStackTrace();
+        // ApiResponse.error() metodunun ApiResponse<Void> döndürdüğünden emin olun
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Beklenmeyen bir hata oluştu."));
     }
-    }
+}
