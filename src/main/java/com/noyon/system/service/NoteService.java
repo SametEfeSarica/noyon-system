@@ -117,4 +117,13 @@ public class NoteService {
         note.setDeleted(false);
         return noteMapper.toResponse(noteRepository.save(note));
     }
+
+    // Notu veritabanından tamamen uçurur
+    public void permanentDelete(Long id) {
+        // Eğer notun var olup olmadığını kontrol etmek istersen buraya ekleyebilirsin
+        // noteRepository.findById(id).orElseThrow(() -> new RuntimeException("Not bulunamadı"));
+
+        noteRepository.deleteById(id);
+    }
+
 }

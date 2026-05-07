@@ -78,7 +78,7 @@ public class LibraryItemMapper {
         entity.setSpine(dto.getSpine());
         entity.setCover(dto.getCover());
         entity.setRating(dto.getRating());
-        entity.setFavorite(dto.isFavorite());
+        entity.setFavorite(dto.getFavorite());
 
         // color[0] → colorStart, color[1] → colorEnd
         entity.setColorStart(colors.size() > 0 ? colors.get(0) : null);
