@@ -1,5 +1,6 @@
 package com.noyon.system.security;
 
+import com.noyon.system.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsServiceImpl userDetailsService;
+    private final UserRepository userRepository; // ← EKLENDİ
 
     @Override
     protected void doFilterInternal(
@@ -30,7 +32,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // 1. Header kontrolü (Token yoksa diğer filtrelere geç)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -40,22 +41,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String email;
 
         try {
-            // 2. Token geçerliliğini ve email'i güvenli şekilde (try-catch içinde) al
             if (!jwtService.isTokenValid(token)) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
             email = jwtService.extractUsername(token);
-
         } catch (Exception e) {
-            // BÜYÜK DÜZELTME 1: Süresi dolmuş veya bozuk token gelirse sistem çökmesin,
-            // sessizce işlemi iptal edip yetkisiz (403) saysın.
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. Kullanıcıyı Authenticate (Giriş yapmış) olarak işaretleme
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
@@ -64,13 +59,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            // BÜYÜK DÜZELTME 2: ClassCastException (Sistem çökme) Önlemi
-            // Gelen UserDetails nesnesi GERÇEKTEN bizim Entity User sınıfımızsa dönüştür.
-            if (userDetails instanceof com.noyon.system.entity.User) {
-                com.noyon.system.entity.User user = (com.noyon.system.entity.User) userDetails;
-                request.setAttribute("userId", user.getId());
-            }
-            // Eğer Spring'in varsayılan User sınıfıysa buraya girmez ve sistemi çökertmez!
+            // Email'den userId'yi çekip request attribute olarak set et
+            userRepository.findByEmail(email).ifPresent(user ->
+                    request.setAttribute("userId", user.getId())
+            );
         }
 
         filterChain.doFilter(request, response);

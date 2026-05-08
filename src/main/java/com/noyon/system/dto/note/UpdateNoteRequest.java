@@ -7,13 +7,18 @@ import java.util.List;
 
 @Data
 public class UpdateNoteRequest {
+
     @NotBlank(message = "Not başlığı boş olamaz.")
-    @Size(max = 255)
-    private String noteType;
+    @Size(max = 255)         // ← bu title'a ait, noteType'a değil
     private String title;
+
     private String content;
+
     @Size(max = 20)
     private String color;
+
+    private String noteType; // ← doğru yere taşındı
+
     private Long folderId;
     private String imageUrl;
     private String pdfUrl;

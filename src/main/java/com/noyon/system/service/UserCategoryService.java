@@ -1,4 +1,3 @@
-// service/UserCategoryService.java
 package com.noyon.system.service;
 
 import com.noyon.system.dto.UserCategoryDto;
@@ -32,51 +31,36 @@ public class UserCategoryService {
 
     @Transactional(readOnly = true)
     public List<UserCategoryDto> getAll(Long userId) {
-        return repo.findByUserId(userId).stream().map(this::toDto).collect(Collectors.toList());
+        return repo.findByUserId(userId)
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public UserCategoryDto create(Long userId, UserCategoryDto dto) {
+    public List<UserCategoryDto> saveAll(Long userId, List<UserCategoryDto> dtos) {
+        repo.deleteAllByUserId(userId);
+        repo.flush();
+
         User user = findUser(userId);
-        UserCategory entity = UserCategory.builder()
-                .categoryId(dto.getCategoryId())
-                .label(dto.getLabel())
-                .color(dto.getColor())
-                .user(user)
-                .build();
-        return toDto(repo.save(entity));
-    }
 
-    @Transactional
-    public UserCategoryDto update(Long id, UserCategoryDto dto) {
-        UserCategory entity = repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Kategori bulunamadı: " + id));
-        entity.setLabel(dto.getLabel());
-        entity.setColor(dto.getColor());
-        return toDto(repo.save(entity));
+        List<UserCategory> saved = dtos.stream()
+                .map(dto -> UserCategory.builder()
+                        .categoryId(dto.getCategoryId())
+                        .label(dto.getLabel())
+                        .color(dto.getColor())
+                        .user(user)
+                        .build())
+                .map(repo::save)
+                .collect(Collectors.toList());
+
+        return saved.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public void delete(Long id) {
         repo.deleteById(id);
-    }
-
-    /**
-     * Frontend'den gelen tam listeyi (saveAll) kaydeder.
-     * Mevcut kategorileri silip yeniden yazar — basit ve güvenli.
-     */
-    @Transactional
-    public List<UserCategoryDto> saveAll(Long userId, List<UserCategoryDto> dtos) {
-        repo.findByUserId(userId).forEach(c -> repo.deleteById(c.getId()));
-        User user = findUser(userId);
-        List<UserCategory> saved = dtos.stream().map(dto -> repo.save(
-                UserCategory.builder()
-                        .categoryId(dto.getCategoryId())
-                        .label(dto.getLabel())
-                        .color(dto.getColor())
-                        .user(user)
-                        .build()
-        )).collect(Collectors.toList());
-        return saved.stream().map(this::toDto).collect(Collectors.toList());
     }
 }

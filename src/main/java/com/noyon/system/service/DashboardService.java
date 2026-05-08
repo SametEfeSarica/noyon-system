@@ -71,6 +71,7 @@ public class DashboardService {
         // 7. DTO'yu inşa et ve gönder
         return DashboardSummaryDTO.builder()
                 .username(user.getUsername())
+                .displayName(user.getDisplayName())
                 .notesCount(notesCount)
                 .booksCount(booksCount) // Artık doğru sayı gelecek
                 .tasksCount(tasksCount)

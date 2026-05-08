@@ -88,7 +88,8 @@ public class NoteService {
         note.setPdfAnnotations(request.getPdfAnnotations());
         note.setPinned(request.isPinned());
         note.setFavorite(request.isFavorite());
-        note.setTags(request.getTags()); // arkadaşınızın eklemesi
+        note.setTags(request.getTags());
+        note.setNoteType(request.getNoteType());
 
         if (request.getFolderId() != null) {
             Folder folder = folderRepository.findById(request.getFolderId())

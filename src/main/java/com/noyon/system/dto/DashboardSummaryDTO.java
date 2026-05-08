@@ -9,6 +9,7 @@ import java.util.List;
 @Builder
 public class DashboardSummaryDTO {
     private String username;
+    private String displayName;
     private long notesCount;
     private long booksCount;
     private long tasksCount;
