@@ -30,13 +30,20 @@ public class Note {
 
     private String imageUrl;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String pdfUrl;
 
     @Column(columnDefinition = "LONGTEXT")
     private String handwritingBase64;
 
+    @Column(columnDefinition = "LONGTEXT")
+    private String pdfAnnotations;
+
     @Column(length = 20)
     private String color;
+
+    @Column(length = 10)
+    private String noteType;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "note_tags", joinColumns = @JoinColumn(name = "note_id"))

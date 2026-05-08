@@ -9,6 +9,7 @@ import java.util.List;
 public class UpdateNoteRequest {
     @NotBlank(message = "Not başlığı boş olamaz.")
     @Size(max = 255)
+    private String noteType;
     private String title;
     private String content;
     @Size(max = 20)
@@ -17,6 +18,7 @@ public class UpdateNoteRequest {
     private String imageUrl;
     private String pdfUrl;
     private String handwritingBase64;
+    private String pdfAnnotations;
     private boolean pinned;
     private boolean favorite;
     private List<String> tags;

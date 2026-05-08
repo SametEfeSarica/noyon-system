@@ -60,6 +60,7 @@ public class NoteService {
                 .imageUrl(request.getImageUrl())
                 .pdfUrl(request.getPdfUrl())
                 .handwritingBase64(request.getHandwritingBase64())
+                .pdfAnnotations(request.getPdfAnnotations())
                 .tags(request.getTags()) // arkadaşınızın eklemesi
                 .user(user)
                 .build();
@@ -84,6 +85,7 @@ public class NoteService {
         note.setImageUrl(request.getImageUrl());
         note.setPdfUrl(request.getPdfUrl());
         note.setHandwritingBase64(request.getHandwritingBase64());
+        note.setPdfAnnotations(request.getPdfAnnotations());
         note.setPinned(request.isPinned());
         note.setFavorite(request.isFavorite());
         note.setTags(request.getTags()); // arkadaşınızın eklemesi

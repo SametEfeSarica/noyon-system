@@ -13,6 +13,7 @@ public class NoteMapper {
         }
 
         return NoteResponse.builder()
+                .noteType(note.getNoteType())
                 .id(note.getId())
                 .title(note.getTitle())
                 .content(note.getContent())
@@ -23,6 +24,7 @@ public class NoteMapper {
                 .imageUrl(note.getImageUrl())
                 .pdfUrl(note.getPdfUrl())
                 .handwritingBase64(note.getHandwritingBase64())
+                .pdfAnnotations(note.getPdfAnnotations())
                 .folderId(note.getFolder() != null ? note.getFolder().getId() : null)
                 .folderName(note.getFolder() != null ? note.getFolder().getName() : null)
                 .createdAt(note.getCreatedAt())

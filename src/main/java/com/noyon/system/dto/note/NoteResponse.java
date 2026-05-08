@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class NoteResponse {
+    private String noteType;
     private Long id;
     private String title;
     private String content;
@@ -18,6 +19,7 @@ public class NoteResponse {
     private String imageUrl;
     private String pdfUrl;
     private String handwritingBase64;
+    private String pdfAnnotations;
     private Long folderId;
     private String folderName;
     private LocalDateTime createdAt;

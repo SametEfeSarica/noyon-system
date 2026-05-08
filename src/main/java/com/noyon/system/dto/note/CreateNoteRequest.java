@@ -17,5 +17,6 @@ public class CreateNoteRequest {
     private String imageUrl;
     private String pdfUrl;
     private String handwritingBase64;
+    private String pdfAnnotations;
     private List<String> tags;
 }
