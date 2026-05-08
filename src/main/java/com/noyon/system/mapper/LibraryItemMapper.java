@@ -71,18 +71,18 @@ public class LibraryItemMapper {
         entity.setAuthor(dto.getAuthor());
         entity.setCategory(dto.getCategory());
         entity.setPages(dto.getPages());
-        entity.setProgress(dto.getProgress());
+        entity.setProgress(dto.getProgress() != null ? dto.getProgress() : 0);
         entity.setYear(dto.getYear());
         entity.setDescription(dto.getDescription());
-        entity.setAccent(dto.getAccent());
-        entity.setSpine(dto.getSpine());
+        if (dto.getAccent() != null) entity.setAccent(dto.getAccent());
+        if (dto.getSpine()  != null) entity.setSpine(dto.getSpine());
         entity.setCover(dto.getCover());
-        entity.setRating(dto.getRating());
-        entity.setFavorite(dto.getFavorite());
+        entity.setRating(dto.getRating()   != null ? dto.getRating()   : 0);
+        entity.setFavorite(dto.getFavorite() != null ? dto.getFavorite() : false);
 
         // color[0] → colorStart, color[1] → colorEnd
-        entity.setColorStart(colors.size() > 0 ? colors.get(0) : null);
-        entity.setColorEnd(colors.size() > 1 ? colors.get(1) : null);
+        if (colors.size() > 0) entity.setColorStart(colors.get(0));
+        if (colors.size() > 1) entity.setColorEnd(colors.get(1));
 
         // tags list → virgülle ayrılmış string
         List<String> tags = dto.getTags();

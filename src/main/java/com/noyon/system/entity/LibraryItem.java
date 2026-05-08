@@ -9,18 +9,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * LibraryItem entity — genişletilmiş versiyon.
- *
- * Frontend (Library.jsx) şu alanları bekliyor:
- *   id, title, author, category, pages, progress,
- *   colorStart, colorEnd (color[0]/color[1] yerine),
- *   accent, spine, cover, year, description,
- *   tags (List<String>), rating, isFavorite
- *
- * DB'de tags virgülle ayrılmış String olarak saklanır,
- * DTO katmanında List<String>'e dönüştürülür.
- */
 @Entity
 @Table(name = "library_items")
 @Getter
@@ -102,7 +90,7 @@ public class LibraryItem {
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
-    
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
