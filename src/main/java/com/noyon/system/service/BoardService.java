@@ -21,9 +21,16 @@ public class BoardService {
     private final UserRepository userRepository;
     private final ChecklistItemRepository checklistItemRepository;
 
+    // getBoard — workspaceId parametresi ekle
     @Transactional(readOnly = true)
-    public BoardResponse getBoard(Long userId) {
-        List<TaskColumn> columns = columnRepository.findByUserIdOrderByPositionAsc(userId);
+    public BoardResponse getBoard(Long userId, Long workspaceId) {
+        List<TaskColumn> columns;
+
+        if (workspaceId != null) {
+            columns = columnRepository.findByUserIdAndWorkspaceIdOrderByPositionAsc(userId, workspaceId);
+        } else {
+            columns = columnRepository.findByUserIdOrderByPositionAsc(userId);
+        }
 
         List<ColumnResponse> columnDtos = columns.stream()
                 .map(this::toColumnResponse)
@@ -33,35 +40,33 @@ public class BoardService {
         for (TaskColumn col : columns) {
             if (col.getCards() != null) {
                 for (ProjectTask card : col.getCards()) {
-                    if (card.getAssignees() != null) {
-                        memberSet.addAll(card.getAssignees());
-                    }
+                    if (card.getAssignees() != null) memberSet.addAll(card.getAssignees());
                 }
             }
         }
 
-        List<AssigneeDto> members = memberSet.stream()
-                .map(this::toAssigneeDto)
-                .collect(Collectors.toList());
-
         return BoardResponse.builder()
                 .columns(columnDtos)
-                .members(members)
+                .members(memberSet.stream().map(this::toAssigneeDto).collect(Collectors.toList()))
                 .build();
     }
 
+    // createColumn — workspaceId'yi kaydet
     @Transactional
     public ColumnResponse createColumn(CreateColumnRequest req, Long userId) {
         User user = findUser(userId);
 
-        // NullPointerException riskini tamamen ortadan kaldıran güvenli kontrol
-        Integer maxPos = columnRepository.findMaxPositionByUserId(userId);
+        Long wsId = req.getWorkspaceId() != null ? req.getWorkspaceId() : 1L;
+
+        // workspace bazlı pozisyon hesapla
+        Integer maxPos = columnRepository.findMaxPositionByUserIdAndWorkspaceId(userId, wsId);
         int nextPos = (maxPos != null) ? maxPos + 1 : 0;
 
         TaskColumn column = TaskColumn.builder()
                 .title(req.getTitle())
                 .color(req.getColor() != null ? req.getColor() : "#6c6af6")
                 .position(nextPos)
+                .workspaceId(wsId)   // ← ekle
                 .user(user)
                 .cards(new ArrayList<>())
                 .build();

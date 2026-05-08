@@ -106,4 +106,10 @@ public class SubscriptionController {
         subscriptionService.restoreSubscription(id);
         return ResponseEntity.ok(ApiResponse.ok("Abonelik geri yüklendi."));
     }
+    // ── ABONELİK KALICI SİLME METODU ──
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<ApiResponse<String>> deletePermanent(@PathVariable Long id) {
+        subscriptionService.permanentDelete(id);
+        return ResponseEntity.ok(ApiResponse.ok("Abonelik kalıcı olarak silindi.", "OK"));
+    }
 }

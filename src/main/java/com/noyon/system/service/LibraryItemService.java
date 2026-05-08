@@ -133,4 +133,7 @@ public class LibraryItemService {
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public void permanentDelete(Long id) {
+    }
 }

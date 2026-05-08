@@ -70,11 +70,6 @@ public class LibraryItemController {
 
     // ── PATCH /api/library/{id}/favorite ─────────────────────────────────────
 
-    /**
-     * Optimistic UI için tasarlandı.
-     * Frontend anında kalbi doldurur, arka planda bu endpoint çağrılır.
-     * Response: { "data": { "isFavorite": true } }
-     */
     @Operation(summary = "Favori durumunu toggle eder")
     @PatchMapping("/{id}/favorite")
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> toggleFavorite(
@@ -125,5 +120,14 @@ public class LibraryItemController {
         return ResponseEntity.ok(
                 ApiResponse.ok("Arama sonuçları:",
                         libraryItemService.searchByTitle(title)));
+    }
+
+    // ── DELETE /api/library/{id}/permanent ───────────────────────────────────
+
+    @Operation(summary = "Kitabı kalıcı olarak siler")
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<ApiResponse<String>> deletePermanent(@PathVariable Long id) {
+        libraryItemService.permanentDelete(id);
+        return ResponseEntity.ok(ApiResponse.ok("Kitap kalıcı olarak silindi.", "OK"));
     }
 }
