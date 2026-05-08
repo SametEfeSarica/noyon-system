@@ -69,6 +69,7 @@ public class LibraryItemService {
      */
     @Transactional(readOnly = true)
     public List<LibraryItemDto> getAllByUser(Long userId) {
+        List<LibraryItem> items = libraryItemRepository.findByUserIdAndDeletedFalse(userId);
         return libraryItemRepository.findByUserIdAndDeletedFalse(userId)
                 .stream()
                 .map(mapper::toDto)
@@ -128,12 +129,19 @@ public class LibraryItemService {
      */
     @Transactional(readOnly = true)
     public List<LibraryItemDto> getTrash(Long userId) {
+        List<LibraryItem> trashedItems = libraryItemRepository.findByUserIdAndDeletedTrue(userId);
         return libraryItemRepository.findByUserIdAndDeletedTrue(userId)
                 .stream()
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Kitabı veritabanından tamamen uçurur (Kalıcı Silme).
+     */
+    @Transactional
     public void permanentDelete(Long id) {
+        libraryItemRepository.deleteById(id);
+        log.info("Kitap kalıcı olarak silindi: id={}", id);
     }
 }
