@@ -9,12 +9,16 @@ import java.util.Optional;
 
 public interface TaskColumnRepository extends JpaRepository<TaskColumn, Long> {
 
-    /** Kullanıcının sütunlarını position sırasıyla getir */
+    // Mevcut — dokunma
     List<TaskColumn> findByUserIdOrderByPositionAsc(Long userId);
+    Optional<TaskColumn> findByIdAndUserId(Long id, Long userId);
 
-    /** Mevcut max position — yeni sütun eklenirken kullanılır */
     @Query("SELECT MAX(c.position) FROM TaskColumn c WHERE c.user.id = :userId")
     Integer findMaxPositionByUserId(@Param("userId") Long userId);
 
-    Optional<TaskColumn> findByIdAndUserId(Long id, Long userId);
+    // YENİ — workspace desteği için ekle
+    List<TaskColumn> findByUserIdAndWorkspaceIdOrderByPositionAsc(Long userId, Long workspaceId);
+
+    @Query("SELECT MAX(c.position) FROM TaskColumn c WHERE c.user.id = :userId AND c.workspaceId = :workspaceId")
+    Integer findMaxPositionByUserIdAndWorkspaceId(@Param("userId") Long userId, @Param("workspaceId") Long workspaceId);
 }

@@ -69,7 +69,9 @@ public class BoardDtos {
     public static class CreateColumnRequest {
         private String title;
         private String color;
+        private Long workspaceId;  // ← bunu ekle
     }
+
 
     @Data
     @NoArgsConstructor
@@ -121,4 +123,6 @@ public class BoardDtos {
     public static class ReorderColumnsRequest {
         private List<Long> columnIds;
     }
+
 }
+

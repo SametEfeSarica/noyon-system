@@ -28,12 +28,12 @@ public class BoardController {
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"))
                 .getId();
     }
-
     @GetMapping
     public ResponseEntity<ApiResponse<BoardResponse>> getBoard(
-            @AuthenticationPrincipal UserDetails principal) {
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestParam(required = false) Long workspaceId) {
         return ResponseEntity.ok(
-                ApiResponse.ok("Pano yüklendi.", boardService.getBoard(userId(principal))));
+                ApiResponse.ok("Pano yüklendi.", boardService.getBoard(userId(principal), workspaceId)));
     }
 
     @PostMapping("/columns")

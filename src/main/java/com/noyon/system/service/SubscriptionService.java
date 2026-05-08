@@ -50,4 +50,9 @@ public class SubscriptionService {
         sub.setDeleted(false);
         subscriptionRepository.save(sub);
     }
+
+    // Aboneliği veritabanından tamamen yok eder
+    public void permanentDelete(Long id) {
+        subscriptionRepository.deleteById(id);
+    }
 }

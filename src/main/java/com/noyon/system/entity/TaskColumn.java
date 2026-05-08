@@ -58,4 +58,7 @@ public class TaskColumn {
     @OrderBy("position ASC")
     @Builder.Default
     private List<ProjectTask> cards = new ArrayList<>();
+    @Column(name = "workspace_id")
+    @Builder.Default
+    private Long workspaceId = 1L;
 }
