@@ -30,13 +30,13 @@ public class Note {
 
     private String imageUrl;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String pdfUrl;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String handwritingBase64;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String pdfAnnotations;
 
     @Column(length = 20)
